@@ -23,7 +23,7 @@ model = Transformer(
     d_ff=2048,
     n_layers=6,
     drop_prob=0.1,
-    device='cpu',
+    device='cuda',
     max_len=100
 )
 

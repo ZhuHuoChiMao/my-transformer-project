@@ -7,11 +7,12 @@ src_len = 5
 trg_len = 6
 vocab_size = 1000
 pad_idx = 0
+print(torch.cuda.is_available())
 
 
-src = torch.randint(1, vocab_size, (batch_size, src_len))
+src = torch.randint(1, vocab_size, (batch_size, src_len)).to("cuda")
 
-trg = torch.randint(1, vocab_size, (batch_size, trg_len))
+trg = torch.randint(1, vocab_size, (batch_size, trg_len)).to("cuda")
 
 model = Transformer(
     src_pad_idx=pad_idx,
@@ -25,7 +26,7 @@ model = Transformer(
     drop_prob=0.1,
     device='cuda',
     max_len=100
-)
+).to("cuda")
 
 output = model(src, trg)
 print(output.shape)

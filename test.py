@@ -1,24 +1,41 @@
 import torch
 from torch import nn
 from tstotal import Transformer
+import trainclass
+from datasets import load_dataset
+from torch.utils.data import Dataset, DataLoader
 
-batch_size = 2
-src_len = 5
-trg_len = 6
-vocab_size = 1000
+ds = load_dataset("swaption2009/20k-en-zh-translation-pinyin-hsk")
+train_lines=ds['train']['text']
+
+
+cd=trainclass.class_datasets(train_lines)
+pairs = cd.parse_en_zh_pairs()
+dataset_dict=cd.test_datasets(pairs)
+
+data = dataset_dict['train']
+
+tok_en = trainclass.SimpleTokenizer('en')
+tok_zh = trainclass.SimpleTokenizer('zh')
+
+tok_en.fit(data['en'])
+tok_zh.fit(data['zh'])
+
+
+dataset = trainclass.SimpleTranslationDataset(data)
+collate_fn = trainclass.SimpleTranslationDataset.make_collate_fn(tok_en, tok_zh, max_src_len=32, max_tgt_len=32)
+loader = DataLoader(dataset, batch_size=2, shuffle=False, collate_fn=collate_fn)
+
+
+
+
 pad_idx = 0
-print(torch.cuda.is_available())
-
-
-src = torch.randint(1, vocab_size, (batch_size, src_len)).to("cuda")
-
-trg = torch.randint(1, vocab_size, (batch_size, trg_len)).to("cuda")
 
 model = Transformer(
-    src_pad_idx=pad_idx,
-    trg_pad_idx=pad_idx,
-    enc_voc_size=vocab_size,
-    dec_voc_size=vocab_size,
+    src_pad_idx=tok_en.pad_id,
+    trg_pad_idx=tok_zh.pad_id,
+    enc_voc_size=len(tok_en.itos),
+    dec_voc_size=len(tok_zh.itos),
     d_model=512,
     n_heads=8,
     d_ff=2048,
@@ -28,5 +45,20 @@ model = Transformer(
     max_len=100
 ).to("cuda")
 
-output = model(src, trg)
-print(output.shape)
+
+for batch in loader:
+    src = batch["input_ids"].to("cuda")
+    trg = batch["decoder_input_ids"].to("cuda")
+
+    output = model(src, trg)
+    print("output.shape:", output.shape)  # 检查维
+    pred_ids = output.argmax(-1)          # 取每步概率最高的 token
+
+    # 解码查看翻译
+    for i in range(pred_ids.size(0)):
+        print("原句:", tok_en.decode(src[i].tolist()))
+        print("翻译:", tok_zh.decode(pred_ids[i].tolist()))
+        print("-" * 50)
+    break
+
+

@@ -50,6 +50,6 @@ class Decoder(nn.Module):
     def forward(self,dec,enc,t_mask,s_mask):
         x =self.embedding(dec)
         for layer in self.layers:
-            dec = layer(x,enc,t_mask,s_mask)
-        dec = self.fc(dec)
-        return dec
+            x = layer(x,enc,t_mask,s_mask)
+        x = self.fc(x)
+        return x

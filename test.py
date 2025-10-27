@@ -1,4 +1,4 @@
-import torch
+import torch,os
 from torch import nn
 from tstotal import Transformer
 import trainclass
@@ -49,6 +49,7 @@ model = Transformer(
 
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
 criterion = nn.CrossEntropyLoss(ignore_index=-100)
+
 
 
 num_epochs = 10

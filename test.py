@@ -76,6 +76,15 @@ for epoch in range(num_epochs):
     avg_loss = total_loss / len(loader)
     print(f"✅ Epoch {epoch+1} finished, avg loss = {avg_loss:.4f}")
 
+    # ✅ 在每个 epoch 结束后保存一次模型到 Google Drive
+    save_path = f"/content/drive/MyDrive/transformer_epoch_{epoch+1}.pt"
+    torch.save(model.state_dict(), save_path)
+
+    # 打印保存信息确认成功
+    import os
+    size_mb = os.path.getsize(save_path) / (1024 * 1024)
+    print(f"💾 模型已保存到: {save_path}  （大小约 {size_mb:.2f} MB）\n")
+
 '''
 for batch in loader:
     src = batch["input_ids"].to("cuda")

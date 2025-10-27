@@ -4,6 +4,7 @@ from tstotal import Transformer
 import trainclass
 from datasets import load_dataset
 from torch.utils.data import Dataset, DataLoader
+from torch import nn, optim
 
 ds = load_dataset("swaption2009/20k-en-zh-translation-pinyin-hsk")
 train_lines=ds['train']['text']
@@ -46,6 +47,36 @@ model = Transformer(
 ).to("cuda")
 
 
+optimizer = optim.Adam(model.parameters(), lr=1e-4)
+criterion = nn.CrossEntropyLoss(ignore_index=-100)
+
+
+num_epochs = 10
+for epoch in range(num_epochs):
+    model.train()
+    total_loss = 0
+
+    for i, batch in enumerate(loader):
+        src = batch["input_ids"].to("cuda")
+        trg = batch["decoder_input_ids"].to("cuda")
+        labels = batch["labels"].to("cuda")
+
+        optimizer.zero_grad()
+        output = model(src, trg)
+
+        loss = criterion(output.view(-1, output.size(-1)), labels.view(-1))
+        loss.backward()
+        optimizer.step()
+
+        total_loss += loss.item()
+
+        if (i + 1) % 100 == 0:  # 每100个batch打印一次
+            print(f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(loader)}], Loss: {loss.item():.4f}")
+
+    avg_loss = total_loss / len(loader)
+    print(f"✅ Epoch {epoch+1} finished, avg loss = {avg_loss:.4f}")
+
+'''
 for batch in loader:
     src = batch["input_ids"].to("cuda")
     trg = batch["decoder_input_ids"].to("cuda")
@@ -60,5 +91,7 @@ for batch in loader:
         print("翻译:", tok_zh.decode(pred_ids[i].tolist()))
         print("-" * 50)
     break
+    
+'''
 
 

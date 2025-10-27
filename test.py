@@ -78,7 +78,7 @@ for epoch in range(num_epochs):
     print(f"✅ Epoch {epoch+1} finished, avg loss = {avg_loss:.4f}")
 
     # ✅ 在每个 epoch 结束后保存一次模型到 Google Drive
-    save_path = f"/content/drive/MyDrive/transformer_epoch_{epoch+1}.pt"
+    save_path = f"/content/drive/MyDrive/transformer_epoch.pt"
     torch.save(model.state_dict(), save_path)
 
     # 打印保存信息确认成功

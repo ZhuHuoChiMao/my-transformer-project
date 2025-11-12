@@ -79,6 +79,7 @@ def translate_en2zh(text_en: str, max_len: int = 32):
 
     # 4) 解码中文：你的 decode 会自动跳过 <pad>/<bos>，遇到 <eos> 截断
     pred_ids = tgt.squeeze(0).tolist()
+    print("pred_ids:", pred_ids)
     zh_text = tok_zh.decode(pred_ids)
     return zh_text
 

@@ -82,9 +82,9 @@ def translate_en2zh(text_en: str, max_len: int = 32):
     return zh_text
 
 # 快速试几句
-print(translate_en2zh("Good morning!"))
-print(translate_en2zh("I like cycling and playing soccer."))
-print(translate_en2zh("This model is a small Transformer I trained myself."))
+print(translate_en2zh("good morning!"))
+print(translate_en2zh("i like cycling and playing soccer."))
+print(translate_en2zh("this model is a small transformer i trained myself."))
 
 
 

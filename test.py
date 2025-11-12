@@ -87,6 +87,22 @@ print(translate_en2zh("good"))
 print(translate_en2zh("you are nice"))
 print(translate_en2zh("hello"))
 
+@torch.no_grad()
+def probe_influence(src_text_a: str, src_text_b: str):
+    def first_step_logits(src_text):
+        src_ids = tok_en.encode(src_text.lower(), add_bos=False, add_eos=True, max_len=32)
+        src = torch.tensor([src_ids], dtype=torch.long, device=device)
+        bos = torch.tensor([[tok_zh.bos_id]], dtype=torch.long, device=device)
+        out = model(src, bos)          # [1, 1, vocab]
+        return out[:, -1, :].float()
+
+    la = first_step_logits(src_text_a)
+    lb = first_step_logits(src_text_b)
+    diff = (la - lb).norm(p=2).item()
+    print(f"L2 diff between '{src_text_a}' and '{src_text_b}': {diff:.6f}")
+
+probe_influence("good morning!", "this is a book.")
+probe_influence("I like cats.", "I like soccer.")
 
 
 

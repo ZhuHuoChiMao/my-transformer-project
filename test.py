@@ -128,13 +128,15 @@ print(translate_en2zh("hello"))
 
 
 
-print("pad_id(en):", tok_en.pad_id, "pad_id(zh):", tok_zh.pad_id)
-print("bos_id(zh):", tok_zh.bos_id, "eos_id(zh):", tok_zh.eos_id)
-print("unk_id(en):", getattr(tok_en, "unk_id", None), "unk_id(zh):", getattr(tok_zh, "unk_id", None))
+import os
+ckpt_path = "/content/drive/MyDrive/transformer_epoch2.pt"
+size_mb = os.path.getsize(ckpt_path) / (1024*1024)
+print(f"✅ 模型文件大小约 {size_mb:.2f} MB")
 
-for s in ["good", "you are nice", "hello"]:
-    ids = tok_en.encode(s, add_bos=False, add_eos=True, max_len=32)
-    print(s, "->", ids, "| %pad =", sum(i==tok_en.pad_id for i in ids)/len(ids))
+# 随机打印部分权重平均值
+sd = torch.load(ckpt_path, map_location="cpu")
+for k,v in list(sd.items())[:5]:
+    print(k, v.mean().item(), v.std().item())
 
 
 

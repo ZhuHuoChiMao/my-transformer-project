@@ -35,8 +35,6 @@ class Transformer(nn.Module):
     def forward(self, src: torch.Tensor, trg: torch.Tensor):
         src_pad_mask = (src == self.src_pad_idx)
         tgt_pad_mask = (trg == self.trg_pad_idx)
-
-
         enc = self.encoder(src, key_padding_mask=src_pad_mask)
 
 

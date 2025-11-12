@@ -128,16 +128,6 @@ print(translate_en2zh("hello"))
 
 
 
-import os
-ckpt_path = "/content/drive/MyDrive/transformer_epoch2.pt"
-size_mb = os.path.getsize(ckpt_path) / (1024*1024)
-print(f"✅ 模型文件大小约 {size_mb:.2f} MB")
-
-# 随机打印部分权重平均值
-sd = torch.load(ckpt_path, map_location="cpu")
-for k,v in list(sd.items())[:5]:
-    print(k, v.mean().item(), v.std().item())
-
 
 
 

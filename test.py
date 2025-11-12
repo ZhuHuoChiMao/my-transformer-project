@@ -48,7 +48,7 @@ model = Transformer(
     device=device,
     max_len=100
 ).to(device)
-
+'''
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
 criterion = nn.CrossEntropyLoss(ignore_index=-100)
 
@@ -92,11 +92,11 @@ for epoch in range(num_epochs):
     torch.save(model.state_dict(), save_path)
     size_mb = os.path.getsize(save_path) / (1024 * 1024)
     print(f"模型已保存到: {save_path} （大小约 {size_mb:.2f} MB）\n")
-
-
 '''
+
+
 # 1) 载入模型参数（用你保存的路径）
-ckpt_path = "/content/drive/MyDrive/transformer_epoch.pt"
+ckpt_path = "/content/drive/MyDrive/transformer_epoch2.pt"
 model.load_state_dict(torch.load(ckpt_path, map_location=device))
 model.eval()
 # 单句英->中
@@ -147,6 +147,6 @@ def probe_influence(src_text_a: str, src_text_b: str):
 
 probe_influence("good morning!", "this is a book.")
 probe_influence("I like cats.", "I like soccer.")
-'''
+
 
 

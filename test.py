@@ -50,7 +50,8 @@ model = Transformer(
 ).to(device)
 
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
-criterion = nn.CrossEntropyLoss(ignore_index=tok_zh.pad_id)
+criterion = nn.CrossEntropyLoss(ignore_index=-100)
+
 
 # 5. 训练循环
 num_epochs = 2

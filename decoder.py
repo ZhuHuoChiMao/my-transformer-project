@@ -37,6 +37,10 @@ class DecoderLayer(nn.Module):
 
 
         _x = x
+        if torch.rand(1).item() < 0.01:  # 只打印少数 batch 避免刷屏
+            print(
+                f"[DEBUG] Cross-Attn Input shapes: q={x.shape}, k={enc.shape}, mask={memory_key_padding_mask.shape if memory_key_padding_mask is not None else None}")
+
         x, _ = self.cross_attn(x, enc, enc,
                                attn_mask=None,
                                key_padding_mask=memory_key_padding_mask)

@@ -1,55 +1,79 @@
 import torch
 from torch import nn
-import torch.nn.functional as F
 import math
-
 from encoder import PositionwiseFeedForward
 from multiattention import MultiHeadAttention
 from layernorm import LayerNorm
 from transformer import TransformerEmbedding
 
-class DecoderLayer(nn.Module):
-    def __init__(self,d_model,d_ff,n_head,drop_prob):
-        super(DecoderLayer,self).__init__()
-        self.attention1 = MultiHeadAttention(d_model,n_head)
-        self.layernorm1 = LayerNorm(d_model)
-        self.droupout1 = nn.Dropout(drop_prob)
-        self.cross_attention = MultiHeadAttention(d_model,n_head)
-        self.layernorm2 = LayerNorm(d_model)
-        self.droupout2 = nn.Dropout(drop_prob)
-        self.d_ff1 = PositionwiseFeedForward(d_model,d_ff,drop_prob)
-        self.layernorm3 = LayerNorm(d_model)
-        self.droupout3 = nn.Dropout(drop_prob)
 
-    def forward(self,dec,enc,t_mask,s_mask):
+class DecoderLayer(nn.Module):
+    def __init__(self, d_model, d_ff, n_head, drop_prob):
+        super().__init__()
+        self.self_attn = MultiHeadAttention(d_model, n_head, dropout=drop_prob)
+        self.cross_attn = MultiHeadAttention(d_model, n_head, dropout=drop_prob)
+
+        self.ln1 = LayerNorm(d_model)
+        self.do1 = nn.Dropout(drop_prob)
+
+        self.ln2 = LayerNorm(d_model)
+        self.do2 = nn.Dropout(drop_prob)
+
+        self.ffn = PositionwiseFeedForward(d_model, d_ff, drop_prob)
+        self.ln3 = LayerNorm(d_model)
+        self.do3 = nn.Dropout(drop_prob)
+
+    def forward(self, dec, enc,
+                tgt_attn_mask=None,
+                tgt_key_padding_mask=None,
+                memory_key_padding_mask=None):
+        # 1) 自注意力
         _x = dec
-        x = self.attention1(dec,dec,dec,t_mask)
-        x = self.droupout1(x)
-        x = self.layernorm1(x + _x)
+        x, _ = self.self_attn(dec, dec, dec,
+                              attn_mask=tgt_attn_mask,
+                              key_padding_mask=tgt_key_padding_mask)
+        x = self.do1(x)
+        x = self.ln1(x + _x)
+
+        # 2) 交叉注意力
         _x = x
-        x = self.cross_attention(x,enc,enc,s_mask)
-        x = self.droupout2(x)
-        x = self.layernorm2(x+ _x)
-        x = self.d_ff1(x)
-        x = self.droupout3(x)
-        x = self.layernorm3(x+ _x)
+        x, _ = self.cross_attn(x, enc, enc,
+                               attn_mask=None,
+                               key_padding_mask=memory_key_padding_mask)
+        x = self.do2(x)
+        x = self.ln2(x + _x)
+
+        # 3) 前馈网络
+        _x = x
+        x = self.ffn(x)
+        x = self.do3(x)
+        x = self.ln3(x + _x)
         return x
+
+
+def generate_causal_mask(T, device):
+    m = torch.full((T, T), float('-inf'), device=device)
+    return torch.triu(m, diagonal=1)  # 下三角(含对角)=0，上三角=-inf
+
 
 class Decoder(nn.Module):
-    def __init__(self,dec_voc_size,max_len,d_model,d_ff,n_head,n_layers,drop_prob,device='cpu'):
-        super(Decoder,self).__init__()
+    def __init__(self, dec_voc_size, max_len, d_model, d_ff, n_head, n_layers, drop_prob, device='cpu'):
+        super().__init__()
         self.embedding = TransformerEmbedding(dec_voc_size, d_model, max_len, drop_prob, device)
-        self.layers = nn.ModuleList(
-            [
-                DecoderLayer(d_model, d_ff, n_head, drop_prob)
-                for _ in range(n_layers)
-            ]
-        )
+        self.layers = nn.ModuleList([
+            DecoderLayer(d_model, d_ff, n_head, drop_prob)
+            for _ in range(n_layers)
+        ])
         self.fc = nn.Linear(d_model, dec_voc_size)
 
-    def forward(self,dec,enc,t_mask,s_mask):
-        x =self.embedding(dec)
+    def forward(self, dec, enc, src_pad_mask, tgt_pad_mask):
+        x = self.embedding(dec)
+        T = dec.size(1)
+        tgt_attn_mask = generate_causal_mask(T, dec.device)
         for layer in self.layers:
-            x = layer(x,enc,t_mask,s_mask)
-        x = self.fc(x)
-        return x
+            x = layer(x, enc,
+                      tgt_attn_mask=tgt_attn_mask,
+                      tgt_key_padding_mask=tgt_pad_mask,
+                      memory_key_padding_mask=src_pad_mask)
+        return self.fc(x)
+

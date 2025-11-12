@@ -6,33 +6,35 @@ from datasets import load_dataset
 from torch.utils.data import Dataset, DataLoader
 from torch import nn, optim
 
+import torch, os
+from torch import nn, optim
+from torch.utils.data import DataLoader
+from datasets import load_dataset
+from tstotal import Transformer
+import trainclass
+
+# 1. 加载数据
 ds = load_dataset("swaption2009/20k-en-zh-translation-pinyin-hsk")
-train_lines=ds['train']['text']
+train_lines = ds['train']['text']
 
-
-cd=trainclass.class_datasets(train_lines)
+cd = trainclass.class_datasets(train_lines)
 pairs = cd.parse_en_zh_pairs()
-dataset_dict=cd.test_datasets(pairs)
-
+dataset_dict = cd.test_datasets(pairs)
 data = dataset_dict['train']
 
+# 2. 构建 tokenizer
 tok_en = trainclass.SimpleTokenizer('en')
 tok_zh = trainclass.SimpleTokenizer('zh')
-
 tok_en.fit(data['en'])
 tok_zh.fit(data['zh'])
 
-
+# 3. DataLoader
 dataset = trainclass.SimpleTranslationDataset(data)
 collate_fn = trainclass.SimpleTranslationDataset.make_collate_fn(tok_en, tok_zh, max_src_len=32, max_tgt_len=32)
-loader = DataLoader(dataset, batch_size=2, shuffle=False, collate_fn=collate_fn)
+loader = DataLoader(dataset, batch_size=2, shuffle=True, collate_fn=collate_fn)
 
-
-
-
-
-pad_idx = 0
-
+# 4. 模型
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = Transformer(
     src_pad_idx=tok_en.pad_id,
     trg_pad_idx=tok_zh.pad_id,
@@ -43,14 +45,55 @@ model = Transformer(
     d_ff=2048,
     n_layers=6,
     drop_prob=0.1,
-    device='cuda',
+    device=device,
     max_len=100
-).to("cuda")
+).to(device)
 
-from torch.nn.functional import log_softmax
+optimizer = optim.Adam(model.parameters(), lr=1e-4)
+criterion = nn.CrossEntropyLoss(ignore_index=tok_zh.pad_id)
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# 5. 训练循环
+num_epochs = 2
+for epoch in range(num_epochs):
+    model.train()
+    total_loss = 0
 
+    for i, batch in enumerate(loader):
+        src = batch["input_ids"].to(device)         # [B, S]
+        tgt_in = batch["decoder_input_ids"].to(device)  # [B, T]
+        labels = batch["labels"].to(device)         # [B, T]
+
+        optimizer.zero_grad()
+
+        # 前向传播
+        logits = model(src, tgt_in)  # [B, T, vocab]
+
+        # 计算 loss
+        loss = criterion(
+            logits.view(-1, logits.size(-1)),
+            labels.view(-1)
+        )
+
+        # 反向传播
+        loss.backward()
+        optimizer.step()
+
+        total_loss += loss.item()
+
+        if (i + 1) % 100 == 0:
+            print(f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(loader)}], Loss: {loss.item():.4f}")
+
+    avg_loss = total_loss / len(loader)
+    print(f"Epoch {epoch+1} finished, avg loss = {avg_loss:.4f}")
+
+    # 保存模型
+    save_path = f"/content/drive/MyDrive/transformer_epoch{epoch+1}.pt"
+    torch.save(model.state_dict(), save_path)
+    size_mb = os.path.getsize(save_path) / (1024 * 1024)
+    print(f"模型已保存到: {save_path} （大小约 {size_mb:.2f} MB）\n")
+
+
+'''
 # 1) 载入模型参数（用你保存的路径）
 ckpt_path = "/content/drive/MyDrive/transformer_epoch.pt"
 model.load_state_dict(torch.load(ckpt_path, map_location=device))
@@ -103,48 +146,6 @@ def probe_influence(src_text_a: str, src_text_b: str):
 
 probe_influence("good morning!", "this is a book.")
 probe_influence("I like cats.", "I like soccer.")
-
-
-
-
-'''
-optimizer = optim.Adam(model.parameters(), lr=1e-4)
-criterion = nn.CrossEntropyLoss(ignore_index=-100)
-
-
-
-num_epochs = 2
-for epoch in range(num_epochs):
-    model.train()
-    total_loss = 0
-
-    for i, batch in enumerate(loader):
-        src = batch["input_ids"].to("cuda")
-        trg = batch["decoder_input_ids"].to("cuda")
-        labels = batch["labels"].to("cuda")
-
-        optimizer.zero_grad()
-        output = model(src, trg)
-
-        loss = criterion(output.view(-1, output.size(-1)), labels.view(-1))
-        loss.backward()
-        optimizer.step()
-
-        total_loss += loss.item()
-
-        if (i + 1) % 100 == 0:
-            print(f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(loader)}], Loss: {loss.item():.4f}")
-
-    avg_loss = total_loss / len(loader)
-    print(f" Epoch {epoch+1} finished, avg loss = {avg_loss:.4f}")
-
-    save_path = f"/content/drive/MyDrive/transformer_epoch.pt"
-    torch.save(model.state_dict(), save_path)
-
-    import os
-    size_mb = os.path.getsize(save_path) / (1024 * 1024)
-    print(f" 模型已保存到: {save_path}  （大小约 {size_mb:.2f} MB）\n")
-
 '''
 
 

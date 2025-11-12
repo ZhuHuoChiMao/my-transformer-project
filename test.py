@@ -79,7 +79,6 @@ def translate_en2zh(text_en: str, max_len: int = 32):
 
     # 4) 解码中文：你的 decode 会自动跳过 <pad>/<bos>，遇到 <eos> 截断
     pred_ids = tgt.squeeze(0).tolist()
-    print("pred_ids:", pred_ids)
     zh_text = tok_zh.decode(pred_ids)
     return zh_text
 
@@ -88,45 +87,22 @@ print(translate_en2zh("good"))
 print(translate_en2zh("you are nice"))
 print(translate_en2zh("hello"))
 
-def show_tokenization(i):
-    en = data[i]["en"]
-    zh = data[i]["zh"]
+@torch.no_grad()
+def probe_influence(src_text_a: str, src_text_b: str):
+    def first_step_logits(src_text):
+        src_ids = tok_en.encode(src_text.lower(), add_bos=False, add_eos=True, max_len=32)
+        src = torch.tensor([src_ids], dtype=torch.long, device=device)
+        bos = torch.tensor([[tok_zh.bos_id]], dtype=torch.long, device=device)
+        out = model(src, bos)          # [1, 1, vocab]
+        return out[:, -1, :].float()
 
-    # --- 英文 ---
-    en_tokens = tok_en._tokenize(en)  # 你的tokenizer里公开的是 _tokenize
-    en_ids_plain = tok_en.encode(en, add_bos=False, add_eos=False, max_len=32)
-    en_ids_eos   = tok_en.encode(en, add_bos=False, add_eos=True,  max_len=32)
-    en_decoded   = tok_en.decode(en_ids_eos)
+    la = first_step_logits(src_text_a)
+    lb = first_step_logits(src_text_b)
+    diff = (la - lb).norm(p=2).item()
+    print(f"L2 diff between '{src_text_a}' and '{src_text_b}': {diff:.6f}")
 
-    # 统计 UNK 比例
-    unk_ratio_en = sum(1 for x in en_ids_plain if x == tok_en.unk_id) / max(1, len(en_ids_plain))
-
-    print(f"\n=== SAMPLE {i} ===")
-    print("EN raw:     ", en)
-    print("EN tokens:  ", en_tokens)
-    print("EN ids:     ", en_ids_plain)
-    print("EN ids+eos: ", en_ids_eos)
-    print("EN decoded: ", en_decoded)
-    print("EN UNK%:    ", f"{unk_ratio_en:.1%}")
-
-    # --- 中文（你的实现是按字符切分） ---
-    zh_tokens = tok_zh._tokenize(zh)
-    zh_ids_bos = tok_zh.encode(zh, add_bos=True,  add_eos=False, max_len=32)
-    zh_ids_eos = tok_zh.encode(zh, add_bos=False, add_eos=True,  max_len=32)
-    zh_decoded = tok_zh.decode(zh_ids_eos)
-
-    unk_ratio_zh = sum(1 for x in zh_ids_eos if x == tok_zh.unk_id) / max(1, len(zh_ids_eos))
-
-    print("ZH raw:     ", zh)
-    print("ZH tokens:  ", zh_tokens[:64])  # 过长就截一下展示
-    print("ZH ids+bos: ", zh_ids_bos)
-    print("ZH ids+eos: ", zh_ids_eos)
-    print("ZH decoded: ", zh_decoded)
-    print("ZH UNK%:    ", f"{unk_ratio_zh:.1%}")
-
-# 看前 3 条
-for i in range(3):
-    show_tokenization(i)
+probe_influence("good morning!", "this is a book.")
+probe_influence("I like cats.", "I like soccer.")
 
 
 

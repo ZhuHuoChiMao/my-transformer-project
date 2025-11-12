@@ -66,7 +66,8 @@ class Transformer(nn.Module):
         cross_mask = self.make_pad_mask_qk(trg, src, self.trg_pad_idx, self.src_pad_idx)     # [B,1,T,S]
 
         # 4) Forward
-        enc = self.encoder(src, mask=src_self_mask)                # 你的 Encoder 要用这个 mask
+        enc = self.encoder(src, key_padding_mask=src_self_mask)
+               # 你的 Encoder 要用这个 mask
         out = self.decoder(trg, enc, t_mask=tgt_self_mask, s_mask=cross_mask)
 
         return out

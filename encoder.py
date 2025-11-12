@@ -54,7 +54,7 @@ class Encoder(nn.Module):
 
     def forward(self, x, key_padding_mask=None):
         if key_padding_mask is None:
-            key_padding_mask = (x == self.pad_id)  # [B,S] True=pad
+            key_padding_mask = (x == self.pad_id)
 
         x = self.embedding(x)  # [B,S,D]
         for layer in self.layers:

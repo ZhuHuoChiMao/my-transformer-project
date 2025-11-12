@@ -34,10 +34,10 @@ class class_datasets:
         zh_list = [zh for _, zh in pairs]
         pairs_ds = Dataset.from_dict({"en": en_list, "zh": zh_list})
 
-        # 3) 切分为 train/test（例如 90%/10%），设置随机种子保证可复现
+
         splits = pairs_ds.train_test_split(test_size=0.1, seed=42, shuffle=True)
 
-        # 如果你还想再从 train 里切出 dev/validation（例如 10%）
+
         tmp = splits["train"].train_test_split(test_size=0.1, seed=42, shuffle=True)
         dataset_dict = DatasetDict({
             "train": tmp["train"],

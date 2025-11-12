@@ -22,7 +22,7 @@ class PositionEmbedding(nn.Module):
 
     def forward(self, x):
         seq_len = x.size(1)
-        return self.encoding[:seq_len, :].unsqueeze(0)  # [1, seq_len, d_model]
+        return self.encoding[:seq_len, :].unsqueeze(0)
 
 
 class TransformerEmbedding(nn.Module):
@@ -33,8 +33,8 @@ class TransformerEmbedding(nn.Module):
         self.drop = nn.Dropout(p=drop_prob)
 
     def forward(self, x):
-        tok_emb = self.tok_emb(x)                   # [B, L, D]
-        pos_emb = self.pos_emb(x)                   # [1, L, D]
+        tok_emb = self.tok_emb(x)
+        pos_emb = self.pos_emb(x)
         x = tok_emb + pos_emb
         return self.drop(x)
 

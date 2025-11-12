@@ -36,13 +36,13 @@ class Transformer(nn.Module):
         src_pad_mask = (src == self.src_pad_idx)
         tgt_pad_mask = (trg == self.trg_pad_idx)
 
-        # 1) 编码器
+
         enc = self.encoder(src, key_padding_mask=src_pad_mask)
 
-        # 2) 解码器
+
         out = self.decoder(trg, enc, src_pad_mask, tgt_pad_mask)
 
-        # 输出 [B, T, vocab]
+
         return out
 
 

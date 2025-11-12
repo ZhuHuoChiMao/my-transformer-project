@@ -27,7 +27,7 @@ class DecoderLayer(nn.Module):
                 tgt_attn_mask=None,
                 tgt_key_padding_mask=None,
                 memory_key_padding_mask=None):
-        # 1) 自注意力
+
         _x = dec
         x, _ = self.self_attn(dec, dec, dec,
                               attn_mask=tgt_attn_mask,
@@ -35,7 +35,7 @@ class DecoderLayer(nn.Module):
         x = self.do1(x)
         x = self.ln1(x + _x)
 
-        # 2) 交叉注意力
+
         _x = x
         x, _ = self.cross_attn(x, enc, enc,
                                attn_mask=None,
@@ -43,7 +43,7 @@ class DecoderLayer(nn.Module):
         x = self.do2(x)
         x = self.ln2(x + _x)
 
-        # 3) 前馈网络
+
         _x = x
         x = self.ffn(x)
         x = self.do3(x)
@@ -53,7 +53,7 @@ class DecoderLayer(nn.Module):
 
 def generate_causal_mask(T, device):
     m = torch.full((T, T), float('-inf'), device=device)
-    return torch.triu(m, diagonal=1)  # 下三角(含对角)=0，上三角=-inf
+    return torch.triu(m, diagonal=1)
 
 
 class Decoder(nn.Module):

@@ -13,7 +13,7 @@ from datasets import load_dataset
 from tstotal import Transformer
 import trainclass
 
-# 1. 加载数据
+
 ds = load_dataset("swaption2009/20k-en-zh-translation-pinyin-hsk")
 train_lines = ds['train']['text']
 
@@ -22,18 +22,18 @@ pairs = cd.parse_en_zh_pairs()
 dataset_dict = cd.test_datasets(pairs)
 data = dataset_dict['train']
 
-# 2. 构建 tokenizer
+
 tok_en = trainclass.SimpleTokenizer('en')
 tok_zh = trainclass.SimpleTokenizer('zh')
 tok_en.fit(data['en'])
 tok_zh.fit(data['zh'])
 
-# 3. DataLoader
+
 dataset = trainclass.SimpleTranslationDataset(data)
 collate_fn = trainclass.SimpleTranslationDataset.make_collate_fn(tok_en, tok_zh, max_src_len=32, max_tgt_len=32)
 loader = DataLoader(dataset, batch_size=2, shuffle=True, collate_fn=collate_fn)
 
-# 4. 模型
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = Transformer(
     src_pad_idx=tok_en.pad_id,
@@ -95,38 +95,33 @@ for epoch in range(num_epochs):
 '''
 
 
-# 1) 载入模型参数（用你保存的路径）
 ckpt_path = "/content/drive/MyDrive/transformer_epoch2.pt"
 model.load_state_dict(torch.load(ckpt_path, map_location=device))
 model.eval()
-# 单句英->中
+
 @torch.no_grad()
 def translate_en2zh(text_en: str, max_len: int = 32):
     # 1) 编码源句：和 collate 一样，src 不加 BOS，末尾加 EOS
     src_ids = tok_en.encode(text_en, add_bos=False, add_eos=True, max_len=max_len)
     src = torch.tensor(src_ids, dtype=torch.long, device=device).unsqueeze(0)  # [1, src_len]
 
-    # 2) 目标序列以 <bos> 开始
     bos_id, eos_id = tok_zh.bos_id, tok_zh.eos_id
     tgt = torch.tensor([[bos_id]], dtype=torch.long, device=device)  # [1, 1]
 
-    # 3) 逐步解码
     for _ in range(max_len):
-        # 你的 Transformer 前向是 model(src, trg)，输出应为 [B, T, V]
         out = model(src, tgt)
-        next_logit = out[:, -1, :]          # 取最后一步
-        next_token = next_logit.argmax(-1)  # 贪心
+        next_logit = out[:, -1, :]
+        next_token = next_logit.argmax(-1)
         tgt = torch.cat([tgt, next_token.unsqueeze(1)], dim=1)
 
         if next_token.item() == eos_id:
             break
 
-    # 4) 解码中文：你的 decode 会自动跳过 <pad>/<bos>，遇到 <eos> 截断
     pred_ids = tgt.squeeze(0).tolist()
     zh_text = tok_zh.decode(pred_ids)
     return zh_text
 
-# 快速试几句
+
 print(translate_en2zh("good"))
 print(translate_en2zh("you are nice"))
 print(translate_en2zh("hello"))
@@ -137,7 +132,7 @@ def probe_influence(src_text_a: str, src_text_b: str):
         src_ids = tok_en.encode(src_text.lower(), add_bos=False, add_eos=True, max_len=32)
         src = torch.tensor([src_ids], dtype=torch.long, device=device)
         bos = torch.tensor([[tok_zh.bos_id]], dtype=torch.long, device=device)
-        out = model(src, bos)          # [1, 1, vocab]
+        out = model(src, bos)
         return out[:, -1, :].float()
 
     la = first_step_logits(src_text_a)

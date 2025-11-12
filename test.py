@@ -27,9 +27,7 @@ dataset = trainclass.SimpleTranslationDataset(data)
 collate_fn = trainclass.SimpleTranslationDataset.make_collate_fn(tok_en, tok_zh, max_src_len=32, max_tgt_len=32)
 loader = DataLoader(dataset, batch_size=2, shuffle=False, collate_fn=collate_fn)
 
-from collections import Counter
-cnt = Counter(dataset_dict["train"]["zh"])
-print(cnt.most_common(10))
+
 
 
 
@@ -85,9 +83,9 @@ def translate_en2zh(text_en: str, max_len: int = 32):
     return zh_text
 
 # 快速试几句
-print(translate_en2zh("good morning!"))
-print(translate_en2zh("i like cycling and playing soccer."))
-print(translate_en2zh("this model is a small transformer i trained myself."))
+print(translate_en2zh("good"))
+print(translate_en2zh("you are nice"))
+print(translate_en2zh("hello"))
 
 
 

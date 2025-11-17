@@ -15,7 +15,6 @@ class MultiHeadAttention(nn.Module):
         self.w_v = nn.Linear(d_model, d_model)
         self.w_o = nn.Linear(d_model, d_model)
 
-        self.dropout = nn.Dropout(dropout)
         self.softmax = nn.Softmax(dim=-1)
 
     def forward(self, q, k, v, attn_mask=None, key_padding_mask=None):
@@ -47,7 +46,6 @@ class MultiHeadAttention(nn.Module):
 
 
         attn = self.softmax(scores.float()).to(q.dtype)
-        attn = self.dropout(attn)
 
 
         out = torch.matmul(attn, v)

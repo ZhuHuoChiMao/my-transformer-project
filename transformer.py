@@ -4,8 +4,8 @@ import math
 
 
 class TokenEmbedding(nn.Embedding):
-    def __init__(self, vocab_size, d_model):
-        super().__init__(vocab_size, d_model, padding_idx=0)
+    def __init__(self, vocab_size, d_model, pad_id):
+        super().__init__(vocab_size, d_model, padding_idx=pad_id)
 
 
 class PositionEmbedding(nn.Module):
@@ -26,9 +26,9 @@ class PositionEmbedding(nn.Module):
 
 
 class TransformerEmbedding(nn.Module):
-    def __init__(self, vocab_size, d_model, max_len, drop_prob, device):
+    def __init__(self, vocab_size, d_model, max_len, drop_prob,pad_id, device):
         super().__init__()
-        self.tok_emb = TokenEmbedding(vocab_size, d_model)
+        self.tok_emb = TokenEmbedding(vocab_size, d_model,pad_id)
         self.pos_emb = PositionEmbedding(d_model, max_len, device)
         self.drop = nn.Dropout(p=drop_prob)
 
@@ -37,8 +37,6 @@ class TransformerEmbedding(nn.Module):
         pos_emb = self.pos_emb(x)
         x = tok_emb + pos_emb
         return self.drop(x)
-
-
 
 
 

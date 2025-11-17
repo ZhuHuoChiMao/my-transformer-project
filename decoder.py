@@ -59,9 +59,9 @@ def generate_causal_mask(T, device):
 
 
 class Decoder(nn.Module):
-    def __init__(self, dec_voc_size, max_len, d_model, d_ff, n_head, n_layers, drop_prob, device='cpu'):
+    def __init__(self, dec_voc_size, max_len, d_model, d_ff, n_head, n_layers, drop_prob, pad_id,device='cpu'):
         super().__init__()
-        self.embedding = TransformerEmbedding(dec_voc_size, d_model, max_len, drop_prob, device)
+        self.embedding = TransformerEmbedding(dec_voc_size, d_model, max_len, drop_prob,pad_id, device)
         self.layers = nn.ModuleList([
             DecoderLayer(d_model, d_ff, n_head, drop_prob)
             for _ in range(n_layers)
@@ -70,8 +70,8 @@ class Decoder(nn.Module):
 
     def forward(self, dec, enc, src_pad_mask, tgt_pad_mask):
         x = self.embedding(dec)
-        T = dec.size(1)
-        tgt_attn_mask = generate_causal_mask(T, dec.device)
+        t = dec.size(1)
+        tgt_attn_mask = generate_causal_mask(t, dec.device)
         for layer in self.layers:
             x = layer(x, enc,
                       tgt_attn_mask=tgt_attn_mask,

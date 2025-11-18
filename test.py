@@ -53,7 +53,7 @@ model = Transformer(
 
 
 
-
+'''
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
 criterion = nn.CrossEntropyLoss(ignore_index=-100)
 
@@ -98,8 +98,8 @@ for epoch in range(num_epochs):
     size_mb = os.path.getsize(save_path) / (1024 * 1024)
     print(f"模型已保存到: {save_path} （大小约 {size_mb:.2f} MB）\n")
 
-
 '''
+
 ckpt_path = "/content/drive/MyDrive/transformer_epoch2.pt"
 model.load_state_dict(torch.load(ckpt_path, map_location=device))
 model.eval()
@@ -132,7 +132,7 @@ print(translate_en2zh("you are nice"))
 print(translate_en2zh("hello"))
 
 
-'''
+
 
 
 

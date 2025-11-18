@@ -17,7 +17,7 @@ class MultiHeadAttention(nn.Module):
 
         self.softmax = nn.Softmax(dim=-1)
 
-    def forward(self, q, k, v, attn_mask=None, key_padding_mask=None,q_padding_mask=None):
+    def forward(self, q, k, v, attn_mask=None, key_padding_mask=None):
         B, Q, _ = q.shape
         Bk, K, _ = k.shape
         assert B == Bk, f"Batch mismatch: q={B}, k={Bk}"
@@ -47,12 +47,6 @@ class MultiHeadAttention(nn.Module):
                 float('-inf')
             )
 
-        # mask Q padding
-        if q_padding_mask is not None:
-            scores = scores.masked_fill(
-                q_padding_mask.unsqueeze(1).unsqueeze(-1),
-                float('-inf')
-            )
 
         attn = self.softmax(scores.float()).to(q.dtype)
 

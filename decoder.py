@@ -40,7 +40,7 @@ class DecoderLayer(nn.Module):
 
         x, _ = self.cross_attn(x, enc, enc,
                                attn_mask=None,
-                               key_padding_mask=memory_key_padding_mask,q_padding_mask=tgt_key_padding_mask)
+                               key_padding_mask=memory_key_padding_mask)
 
         x = self.do2(x)
         x = self.ln2(x + _x)

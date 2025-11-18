@@ -28,7 +28,7 @@ class MultiHeadAttention(nn.Module):
         k = self.w_k(k).view(B, K, H, d_k).permute(0, 2, 1, 3)
         v = self.w_v(v).view(B, K, H, d_k).permute(0, 2, 1, 3)
 
-
+        '''
         scores = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(d_k)
 
 
@@ -48,11 +48,49 @@ class MultiHeadAttention(nn.Module):
             )
 
 
+
         attn = self.softmax(scores.float()).to(q.dtype)
-
-
+        
+        
         out = torch.matmul(attn, v)
         out = out.permute(0, 2, 1, 3).contiguous().view(B, Q, self.d_model)
         out = self.w_o(out)
         return out, attn
+        '''
+
+        scores = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(d_k)
+        # scores shape: [B, H, Q, K]
+
+        # ------ attn_mask ------
+        if attn_mask is not None:
+            # attn_mask should broadcast to [B, H, Q, K]
+            if attn_mask.dtype == torch.bool:
+                attn_mask = attn_mask.masked_fill(attn_mask, float('-inf'))
+            if attn_mask.dim() == 2:
+                attn_mask = attn_mask.unsqueeze(0).unsqueeze(0)  # [1,1,Q,K]
+            scores = scores + attn_mask
+
+        # ------ key_padding_mask ------
+        if key_padding_mask is not None:
+            # key_padding_mask: [B, K]
+            # mask to shape [B,1,1,K]
+            mask = key_padding_mask.unsqueeze(1).unsqueeze(1)
+            scores = scores.masked_fill(mask, float('-inf'))
+
+        # ------ softmax ------
+        # reshape to combine (B*H)
+        scores = scores.view(B * H, Q, K)
+        attn = self.softmax(scores)  # [B*H, Q, K]
+        attn = attn.view(B, H, Q, K)  # [B, H, Q, K]
+
+        # ------ attention output ------
+        out = torch.matmul(attn, v)  # [B, H, Q, d_k]
+        out = out.permute(0, 2, 1, 3).contiguous().view(B, Q, self.d_model)
+        out = self.w_o(out)
+        return out, attn
+
+
+
+
+
 

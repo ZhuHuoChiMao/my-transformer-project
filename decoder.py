@@ -38,9 +38,11 @@ class DecoderLayer(nn.Module):
 
         _x = x
 
-        x, _ = self.cross_attn(x, enc, enc,
+        x, attn_weights = self.cross_attn(x, enc, enc,
                                attn_mask=None,
                                key_padding_mask=memory_key_padding_mask)
+
+        print("cross-attn mean:", attn_weights.mean().item())
 
         x = self.do2(x)
         x = self.ln2(x + _x)

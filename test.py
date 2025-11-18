@@ -33,9 +33,6 @@ dataset = trainclass.SimpleTranslationDataset(data)
 collate_fn = trainclass.SimpleTranslationDataset.make_collate_fn(tok_en, tok_zh, max_src_len=32, max_tgt_len=32)
 loader = DataLoader(dataset, batch_size=2, shuffle=True, collate_fn=collate_fn)
 
-print(f"tok_en.pad_id: {tok_en.pad_id}, type: {type(tok_en.pad_id)}")
-print(f"tok_ko.pad_id: {tok_zh.pad_id}, type: {type(tok_zh.pad_id)}")
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = Transformer(
     src_pad_idx=tok_en.pad_id,
@@ -100,7 +97,7 @@ for epoch in range(num_epochs):
 
 '''
 
-ckpt_path = "/content/drive/MyDrive/transformer_epoch2.pt"
+ckpt_path = "/content/drive/MyDrive/transformer_epoch5.pt"
 model.load_state_dict(torch.load(ckpt_path, map_location=device))
 model.eval()
 

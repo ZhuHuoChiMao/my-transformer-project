@@ -33,6 +33,8 @@ dataset = trainclass.SimpleTranslationDataset(data)
 collate_fn = trainclass.SimpleTranslationDataset.make_collate_fn(tok_en, tok_zh, max_src_len=32, max_tgt_len=32)
 loader = DataLoader(dataset, batch_size=2, shuffle=True, collate_fn=collate_fn)
 
+print(f"tok_en.pad_id: {tok_en.pad_id}, type: {type(tok_en.pad_id)}")
+print(f"tok_ko.pad_id: {tok_zh.pad_id}, type: {type(tok_zh.pad_id)}")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = Transformer(
@@ -49,12 +51,15 @@ model = Transformer(
     max_len=100
 ).to(device)
 
+
+
+
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
 criterion = nn.CrossEntropyLoss(ignore_index=-100)
 
 
 # 5. 训练循环
-num_epochs = 2
+num_epochs = 5
 for epoch in range(num_epochs):
     model.train()
     total_loss = 0

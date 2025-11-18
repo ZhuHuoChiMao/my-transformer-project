@@ -42,10 +42,9 @@ class EncoderLayer(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self, enc_voc_size, max_len, d_model, d_ff, n_head, n_layers,pad_id,
-                 dropout=0.1, device='cpu',):
+    def __init__(self, enc_voc_size, max_len, d_model, d_ff, n_head, n_layers,pad_id,dropout=0.1, device='cpu',):
         super().__init__()
-        self.embedding = TransformerEmbedding(enc_voc_size, d_model, max_len, dropout,pad_id, device)
+        self.embedding = TransformerEmbedding(enc_voc_size, d_model, max_len, pad_id, dropout,device)
         self.layers = nn.ModuleList([
             EncoderLayer(d_model, n_head, d_ff, dropout)
             for _ in range(n_layers)

@@ -24,10 +24,10 @@ class Transformer(nn.Module):
                  n_layers,
                  drop_prob,
                  device,
-                 max_len=100):
+                 max_len):
         super().__init__()
-        self.encoder = Encoder(enc_voc_size, max_len, d_model, d_ff, n_heads, n_layers, drop_prob, src_pad_idx,device)
-        self.decoder = Decoder(dec_voc_size, max_len, d_model, d_ff, n_heads, n_layers, drop_prob,trg_pad_idx,device)
+        self.encoder = Encoder(enc_voc_size, max_len, d_model, d_ff, n_heads, n_layers, src_pad_idx, drop_prob,device)
+        self.decoder = Decoder(dec_voc_size, max_len, d_model, d_ff, n_heads, n_layers,trg_pad_idx, drop_prob,device)
         self.trg_pad_idx = trg_pad_idx
         self.src_pad_idx = src_pad_idx
         self.device = device

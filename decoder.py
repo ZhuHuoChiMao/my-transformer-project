@@ -42,7 +42,14 @@ class DecoderLayer(nn.Module):
                                attn_mask=None,
                                key_padding_mask=memory_key_padding_mask)
 
-        print("cross-attn mean:", attn_weights.mean().item())
+        if self.training and not hasattr(self, "debug_printed"):
+            with torch.no_grad():
+                # attn_weights: [B, H, Q, K]
+                B, H, Q, K = attn_weights.shape
+                w = attn_weights[0, 0, 0]  # 取第一个 batch、第一个 head、第一个 query 的注意力分布
+                print("cross-attn[0,0,0][:10] =", w[:10])
+                print("  sum =", w.sum().item(), "std =", w.std().item(), "K =", K)
+            self.debug_printed = True
 
         x = self.do2(x)
         x = self.ln2(x + _x)

@@ -102,26 +102,33 @@ model.load_state_dict(torch.load(ckpt_path, map_location=device))
 model.eval()
 
 @torch.no_grad()
-def translate_en2zh(text_en: str, max_len: int = 32):
-    # 1) 编码源句：和 collate 一样，src 不加 BOS，末尾加 EOS
-    src_ids = tok_en.encode(text_en, add_bos=False, add_eos=True, max_len=max_len)
-    src = torch.tensor(src_ids, dtype=torch.long, device=device).unsqueeze(0)  # [1, src_len]
+def translate_en2zh(text_en: str, src_max_len=64, tgt_max_len=64):
+    # 1. encode src
+    src_ids = tok_en.encode(text_en, add_bos=False, add_eos=True, max_len=src_max_len)
+    src = torch.tensor([src_ids], dtype=torch.long, device=device)
 
     bos_id, eos_id = tok_zh.bos_id, tok_zh.eos_id
-    tgt = torch.tensor([[bos_id]], dtype=torch.long, device=device)  # [1, 1]
+    tgt = torch.tensor([[bos_id]], dtype=torch.long, device=device)
 
-    for _ in range(max_len):
-        out = model(src, tgt)
-        next_logit = out[:, -1, :]
+    for _ in range(tgt_max_len):
+        out = model(src, tgt)           # [1, T, vocab]
+        next_logit = out[:, -1, :]      # last token
         next_token = next_logit.argmax(-1)
+
         tgt = torch.cat([tgt, next_token.unsqueeze(1)], dim=1)
 
         if next_token.item() == eos_id:
             break
 
-    pred_ids = tgt.squeeze(0).tolist()
-    zh_text = tok_zh.decode(pred_ids)
-    return zh_text
+    pred_ids = tgt.squeeze(0).tolist()  # remove batch dim
+
+    # --- remove BOS & EOS ---
+    pred_ids = pred_ids[1:]  # drop BOS
+    if eos_id in pred_ids:
+        pred_ids = pred_ids[:pred_ids.index(eos_id)]
+
+    return tok_zh.decode(pred_ids)
+
 
 
 print(translate_en2zh("good"))

@@ -95,7 +95,7 @@ for epoch in range(num_epochs):
 '''
 
 
-ckpt_path = "/content/drive/MyDrive/transformer_epoch5.pt"
+ckpt_path = "/content/drive/MyDrive/transformer_epoch.pt"
 model.load_state_dict(torch.load(ckpt_path, map_location=device))
 model.eval()
 
@@ -132,7 +132,7 @@ def translate_en2zh(text_en: str, src_max_len=64, tgt_max_len=64):
 print(translate_en2zh("good"))
 print(translate_en2zh("you are nice"))
 print(translate_en2zh("hello"))
-
+print(translate_en2zh("hello is a world"))
 
 
 

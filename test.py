@@ -43,16 +43,16 @@ model = Transformer(
     trg_pad_idx=tok_zh.pad_id,
     enc_voc_size=len(tok_en.itos),
     dec_voc_size=len(tok_zh.itos),
-    d_model=512,
-    n_heads=8,
-    d_ff=2048,
-    n_layers=6,
+    d_model=1024,
+    n_heads=16,
+    d_ff=4096,
+    n_layers=16,
     drop_prob=0.1,
     device=device,
     max_len=100
 ).to(device)
 
-'''
+
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
 criterion = nn.CrossEntropyLoss(ignore_index=-100)
 
@@ -91,14 +91,14 @@ for epoch in range(num_epochs):
 
 
     # 保存模型
-    save_path = f"/content/drive/MyDrive/transformer_epoch_add.pt"
+    save_path = f"/content/drive/MyDrive/transformer_epoch.pt"
     torch.save(model.state_dict(), save_path)
     size_mb = os.path.getsize(save_path) / (1024 * 1024)
     print(f"模型已保存到: {save_path} （大小约 {size_mb:.2f} MB）\n")
+
+
+
 '''
-
-
-
 ckpt_path = "/content/drive/MyDrive/transformer_epoch_add.pt"
 model.load_state_dict(torch.load(ckpt_path, map_location=device))
 model.eval()
@@ -138,7 +138,7 @@ print(translate_en2zh("you are nice"))
 print(translate_en2zh("hello"))
 print(translate_en2zh("hello is a world"))
 
-
+'''
 
 
 

@@ -20,8 +20,8 @@ class DecoderLayer(nn.Module):
         self.do2 = nn.Dropout(drop_prob)
 
         #add
-        self.lna = LayerNorm(d_model)
-        self.doa = nn.Dropout(drop_prob)
+        #self.lna = LayerNorm(d_model)
+       # self.doa = nn.Dropout(drop_prob)
 
         self.ffn = PositionwiseFeedForward(d_model, d_ff, drop_prob)
         self.ln3 = LayerNorm(d_model)
@@ -59,12 +59,12 @@ class DecoderLayer(nn.Module):
 
 
         #add
-        _x = x
-        x, _ = self.self_attn(x, dec, dec,
-                              attn_mask=tgt_attn_mask,
-                              key_padding_mask=tgt_key_padding_mask)
-        x = self.doa(x)
-        x = self.lna(x + _x)
+       # _x = x
+       # x, _ = self.self_attn(x, dec, dec,
+       #                       attn_mask=tgt_attn_mask,
+      #                        key_padding_mask=tgt_key_padding_mask)
+     #   x = self.doa(x)
+    #    x = self.lna(x + _x)
 
 
         _x = x

@@ -20,8 +20,8 @@ class DecoderLayer(nn.Module):
         self.do2 = nn.Dropout(drop_prob)
 
         #add
-        #self.lna = LayerNorm(d_model)
-       # self.doa = nn.Dropout(drop_prob)
+        self.lna = LayerNorm(d_model)
+        self.doa = nn.Dropout(drop_prob)
 
         self.ffn = PositionwiseFeedForward(d_model, d_ff, drop_prob)
         self.ln3 = LayerNorm(d_model)
@@ -59,12 +59,12 @@ class DecoderLayer(nn.Module):
 
 
         #add
-       # _x = x
-       # x, _ = self.self_attn(x, dec, dec,
-       #                       attn_mask=tgt_attn_mask,
-      #                        key_padding_mask=tgt_key_padding_mask)
-     #   x = self.doa(x)
-    #    x = self.lna(x + _x)
+        _x = x
+        x, _ = self.self_attn(x, dec, dec,
+                              attn_mask=tgt_attn_mask,
+                              key_padding_mask=tgt_key_padding_mask)
+        x = self.doa(x)
+        x = self.lna(x + _x)
 
 
         _x = x
@@ -80,7 +80,7 @@ def generate_causal_mask(T, device):
 
 
 class Decoder(nn.Module):
-    def __init__(self, dec_voc_size, max_len, d_model, d_ff, n_head, n_layers, pad_id,drop_prob, device='cpu'):
+    def __init__(self, dec_voc_size, max_len, d_model, d_ff, n_head, n_layers, pad_id,drop_prob, device='cuda'):
         super().__init__()
         self.embedding = TransformerEmbedding(dec_voc_size, d_model, max_len, pad_id, drop_prob,device)
         self.layers = nn.ModuleList([

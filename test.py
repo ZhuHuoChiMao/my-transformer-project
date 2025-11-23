@@ -89,13 +89,13 @@ for epoch in range(num_epochs):
     avg_loss = total_loss / len(loader)
     print(f"Epoch {epoch+1} finished, avg loss = {avg_loss:.4f}")
 
-'''
+
     # 保存模型
-    save_path = f"/content/drive/MyDrive/transformer_epoch.pt"
+    save_path = f"/content/drive/MyDrive/transformer_epoch_add.pt"
     torch.save(model.state_dict(), save_path)
     size_mb = os.path.getsize(save_path) / (1024 * 1024)
     print(f"模型已保存到: {save_path} （大小约 {size_mb:.2f} MB）\n")
-'''
+
 '''
 
 

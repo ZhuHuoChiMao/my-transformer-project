@@ -13,7 +13,6 @@ from datasets import load_dataset
 from tstotal import Transformer
 import trainclass
 
-
 ds = load_dataset("swaption2009/20k-en-zh-translation-pinyin-hsk")
 train_lines = ds['train']['text']
 
@@ -42,7 +41,7 @@ model = Transformer(
     d_model=512,
     n_heads=8,
     d_ff=2048,
-    n_layers=6,
+    n_layers=7,
     drop_prob=0.1,
     device=device,
     max_len=100

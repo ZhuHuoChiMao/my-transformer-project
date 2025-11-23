@@ -31,7 +31,7 @@ tok_zh.fit(data['zh'])
 
 dataset = trainclass.SimpleTranslationDataset(data)
 collate_fn = trainclass.SimpleTranslationDataset.make_collate_fn(tok_en, tok_zh, max_src_len=32, max_tgt_len=32)
-loader = DataLoader(dataset, batch_size=8, shuffle=True, collate_fn=collate_fn)
+loader = DataLoader(dataset, batch_size=64, shuffle=True, collate_fn=collate_fn)
 
 dataset_test = trainclass.SimpleTranslationDataset(data_test)
 collate_fn = trainclass.SimpleTranslationDataset.make_collate_fn(tok_en, tok_zh, max_src_len=32, max_tgt_len=32)
@@ -46,7 +46,7 @@ model = Transformer(
     d_model=512,
     n_heads=8,
     d_ff=2048,
-    n_layers=24,
+    n_layers=6,
     drop_prob=0.1,
     device=device,
     max_len=100

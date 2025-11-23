@@ -30,7 +30,7 @@ tok_zh.fit(data['zh'])
 
 dataset = trainclass.SimpleTranslationDataset(data)
 collate_fn = trainclass.SimpleTranslationDataset.make_collate_fn(tok_en, tok_zh, max_src_len=32, max_tgt_len=32)
-loader = DataLoader(dataset, batch_size=4, shuffle=True, collate_fn=collate_fn)
+loader = DataLoader(dataset, batch_size=8, shuffle=True, collate_fn=collate_fn)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = Transformer(

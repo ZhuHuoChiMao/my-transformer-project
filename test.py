@@ -56,7 +56,7 @@ model = Transformer(
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
 criterion = nn.CrossEntropyLoss(ignore_index=-100)
 
-num_epochs = 12
+num_epochs = 32
 for epoch in range(num_epochs):
     model.train()
     total_loss = 0

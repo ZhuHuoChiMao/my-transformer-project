@@ -31,7 +31,7 @@ tok_zh.fit(data['zh'])
 
 dataset = trainclass.SimpleTranslationDataset(data)
 collate_fn = trainclass.SimpleTranslationDataset.make_collate_fn(tok_en, tok_zh, max_src_len=32, max_tgt_len=32)
-loader = DataLoader(dataset, batch_size=2, shuffle=True, collate_fn=collate_fn)
+loader = DataLoader(dataset, batch_size=1, shuffle=True, collate_fn=collate_fn)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = Transformer(
@@ -42,19 +42,19 @@ model = Transformer(
     d_model=512,
     n_heads=8,
     d_ff=2048,
-    n_layers=6,
+    n_layers=1,
     drop_prob=0.1,
     device=device,
     max_len=100
 ).to(device)
 
-'''
+
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
 criterion = nn.CrossEntropyLoss(ignore_index=-100)
 
 
 # 5. 训练循环
-num_epochs = 64
+num_epochs = 1
 for epoch in range(num_epochs):
     model.train()
     total_loss = 0
@@ -67,7 +67,7 @@ for epoch in range(num_epochs):
         optimizer.zero_grad()
 
         # 前向传播
-        logits = model(src, tgt_in)  # [B, T, vocab]
+        logits = model(src, tgt_in)  
 
         # 计算 loss
         loss = criterion(
@@ -133,7 +133,7 @@ print(translate_en2zh("good"))
 print(translate_en2zh("you are nice"))
 print(translate_en2zh("hello"))
 print(translate_en2zh("hello is a world"))
-
+'''
 
 
 

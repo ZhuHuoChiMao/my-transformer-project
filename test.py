@@ -133,10 +133,11 @@ def translate_en2zh(text_en: str, src_max_len=64, tgt_max_len=64):
 
 
 
-print(translate_en2zh("good"))
-print(translate_en2zh("you are nice"))
-print(translate_en2zh("hello"))
-print(translate_en2zh("hello is a world"))
+print(translate_en2zh("this cake is good"))
+print(translate_en2zh("i don't like eating vegetables"))
+print(translate_en2zh("the winner of the competition will receive a cash prize"))
+print(translate_en2zh("who can tell me the way to the nearest subway station"))
+print(translate_en2zh("do you have any plans for the weekend"))
 
 
 

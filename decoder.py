@@ -19,6 +19,10 @@ class DecoderLayer(nn.Module):
         self.ln2 = LayerNorm(d_model)
         self.do2 = nn.Dropout(drop_prob)
 
+        #add
+        self.lna = LayerNorm(d_model)
+        self.doa = nn.Dropout(drop_prob)
+
         self.ffn = PositionwiseFeedForward(d_model, d_ff, drop_prob)
         self.ln3 = LayerNorm(d_model)
         self.do3 = nn.Dropout(drop_prob)
@@ -44,15 +48,23 @@ class DecoderLayer(nn.Module):
 
         if self.training and not hasattr(self, "debug_printed"):
             with torch.no_grad():
-                # attn_weights: [B, H, Q, K]
                 B, H, Q, K = attn_weights.shape
-                w = attn_weights[0, 0, 0]  # 取第一个 batch、第一个 head、第一个 query 的注意力分布
+                w = attn_weights[0, 0, 0]
                 print("cross-attn[0,0,0][:10] =", w[:10])
                 print("  sum =", w.sum().item(), "std =", w.std().item(), "K =", K)
             self.debug_printed = True
 
         x = self.do2(x)
         x = self.ln2(x + _x)
+
+
+        #add
+        _x = x
+        x, _ = self.self_attn(x, dec, dec,
+                              attn_mask=tgt_attn_mask,
+                              key_padding_mask=tgt_key_padding_mask)
+        x = self.doa(x)
+        x = self.lna(x + _x)
 
 
         _x = x

@@ -20,6 +20,7 @@ cd = trainclass.class_datasets(train_lines)
 pairs = cd.parse_en_zh_pairs()
 dataset_dict = cd.test_datasets(pairs)
 data = dataset_dict['train']
+data_test = dataset_dict['test']
 
 
 tok_en = trainclass.SimpleTokenizer('en')
@@ -32,6 +33,10 @@ dataset = trainclass.SimpleTranslationDataset(data)
 collate_fn = trainclass.SimpleTranslationDataset.make_collate_fn(tok_en, tok_zh, max_src_len=32, max_tgt_len=32)
 loader = DataLoader(dataset, batch_size=8, shuffle=True, collate_fn=collate_fn)
 
+dataset_test = trainclass.SimpleTranslationDataset(data_test)
+collate_fn = trainclass.SimpleTranslationDataset.make_collate_fn(tok_en, tok_zh, max_src_len=32, max_tgt_len=32)
+loader_test = DataLoader(dataset_test, batch_size=8, shuffle=True, collate_fn=collate_fn)
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = Transformer(
     src_pad_idx=tok_en.pad_id,
@@ -41,7 +46,7 @@ model = Transformer(
     d_model=512,
     n_heads=8,
     d_ff=2048,
-    n_layers=8,
+    n_layers=24,
     drop_prob=0.1,
     device=device,
     max_len=100
@@ -51,7 +56,7 @@ model = Transformer(
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
 criterion = nn.CrossEntropyLoss(ignore_index=-100)
 
-num_epochs = 1
+num_epochs = 12
 for epoch in range(num_epochs):
     model.train()
     total_loss = 0

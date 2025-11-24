@@ -99,7 +99,7 @@ for epoch in range(num_epochs):
 '''
 
 
-ckpt_path = "/content/drive/MyDrive/transformer_epoch_add.pt"
+ckpt_path = "/content/drive/MyDrive/transformer_epoch.pt"
 model.load_state_dict(torch.load(ckpt_path, map_location=device))
 model.eval()
 

@@ -40,7 +40,7 @@ class DecoderLayer(nn.Module):
         x = self.do1(x)
         x = self.ln1(x + _x)
 
-        print(f"  ln1: {x[0, 0, -1, :].tolist()}")
+        #print(f"  ln1: {x[0, 0, -1, :].tolist()}")
 
 
 
@@ -62,7 +62,7 @@ class DecoderLayer(nn.Module):
         x = self.do2(x)
         x = self.ln2(x + _x)
 
-        print(f"  ln2: {x[0, 0, -1, :].tolist()}")
+        #print(f"  ln2: {x[0, 0, -1, :].tolist()}")
 
         #add
         #_x = x

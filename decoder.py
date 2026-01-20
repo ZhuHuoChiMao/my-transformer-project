@@ -33,11 +33,16 @@ class DecoderLayer(nn.Module):
                 memory_key_padding_mask=None):
 
         _x = dec
-        x, _ = self.self_attn(dec, dec, dec,
+        x, attn = self.self_attn(dec, dec, dec,
                               attn_mask=tgt_attn_mask,
                               key_padding_mask=tgt_key_padding_mask)
+
         x = self.do1(x)
         x = self.ln1(x + _x)
+
+        print(f"  ln1: {x[0, 0, -1, :].tolist()}")
+
+
 
 
         _x = x
@@ -57,6 +62,7 @@ class DecoderLayer(nn.Module):
         x = self.do2(x)
         x = self.ln2(x + _x)
 
+        print(f"  ln2: {x[0, 0, -1, :].tolist()}")
 
         #add
         #_x = x
@@ -71,6 +77,7 @@ class DecoderLayer(nn.Module):
         x = self.ffn(x)
         x = self.do3(x)
         x = self.ln3(x + _x)
+
         return x
 
 
@@ -88,6 +95,7 @@ class Decoder(nn.Module):
             for _ in range(n_layers)
         ])
         self.fc = nn.Linear(d_model, dec_voc_size)
+        #self.history = []
 
     def forward(self, dec, enc, src_pad_mask, tgt_pad_mask):
         x = self.embedding(dec)
@@ -98,5 +106,9 @@ class Decoder(nn.Module):
                       tgt_attn_mask=tgt_attn_mask,
                       tgt_key_padding_mask=tgt_pad_mask,
                       memory_key_padding_mask=src_pad_mask)
+
+            #x_vec = x.detach().cpu().numpy()
+            #self.history.append(x_vec)
+
         return self.fc(x)
 

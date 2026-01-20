@@ -52,7 +52,7 @@ model = Transformer(
     max_len=100
 ).to(device)
 
-'''
+
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
 criterion = nn.CrossEntropyLoss(ignore_index=-100)
 
@@ -108,9 +108,13 @@ def translate_en2zh(text_en: str, src_max_len=64, tgt_max_len=64):
     # 1. encode src
     src_ids = tok_en.encode(text_en, add_bos=False, add_eos=True, max_len=src_max_len)
     src = torch.tensor([src_ids], dtype=torch.long, device=device)
+    print(f"\n[Inference Start] Input: {src_ids} and {src}")
 
     bos_id, eos_id = tok_zh.bos_id, tok_zh.eos_id
     tgt = torch.tensor([[bos_id]], dtype=torch.long, device=device)
+    print(f"\n[Inference Start] Input: {bos_id}")
+    print(f"\n[Inference Start] Input: {eos_id}")
+    print(f"\n[Inference Start] Input: {text_en}")
 
     for _ in range(tgt_max_len):
         out = model(src, tgt)           # [1, T, vocab]
@@ -138,6 +142,8 @@ print(translate_en2zh("i don't like eating vegetables"))
 print(translate_en2zh("the winner of the competition will receive a cash prize"))
 print(translate_en2zh("who can tell me the way to the nearest subway station"))
 print(translate_en2zh("do you have any plans for the weekend"))
+
+'''
 
 
 

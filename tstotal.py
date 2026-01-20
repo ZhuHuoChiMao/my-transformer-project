@@ -31,14 +31,20 @@ class Transformer(nn.Module):
         self.trg_pad_idx = trg_pad_idx
         self.src_pad_idx = src_pad_idx
         self.device = device
+        #self.history = []
 
     def forward(self, src: torch.Tensor, trg: torch.Tensor):
         src_pad_mask = (src == self.src_pad_idx)
         tgt_pad_mask = (trg == self.trg_pad_idx)
+
         enc = self.encoder(src, key_padding_mask=src_pad_mask)
 
 
+
         out = self.decoder(trg, enc, src_pad_mask, tgt_pad_mask)
+
+        out_vec = out.detach().cpu().numpy()
+        #self.history.append(out_vec)
 
 
         return out

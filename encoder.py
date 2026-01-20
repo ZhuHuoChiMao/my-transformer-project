@@ -12,9 +12,24 @@ class PositionwiseFeedForward(nn.Module):
         self.linear2 = nn.Linear(d_ff, d_model)
         self.dropout = nn.Dropout(dropout)
         self.activation = nn.ReLU()
+        #self.history_ffn1 = []
+        #self.history_ffn2 = []
+        #self.history_ffn3 = []
+        #self.history_ffn4 = []
 
     def forward(self, x):
-        return self.linear2(self.dropout(self.activation(self.linear1(x))))
+
+        #ffn_vec1 = self.linear1(x).detach().cpu().numpy()
+        #self.history_ffn1.append(ffn_vec1)
+        #ffn_vec2 = self.activation(self.linear1(x)).detach().cpu().numpy()
+        #self.history_ffn2.append(ffn_vec2)
+        #ffn_vec3 = self.activation(self.linear1(x)).detach().cpu().numpy()
+        #self.history_ffn3.append(ffn_vec3)
+        #ffn_vec4 = self.linear2(self.activation(self.linear1(x))).detach().cpu().numpy()
+        #vself.history_ffn4.append(ffn_vec4)
+
+        return self.linear2(self.activation(self.linear1(x)))
+
 
 
 class EncoderLayer(nn.Module):
@@ -36,8 +51,10 @@ class EncoderLayer(nn.Module):
         )
         x = self.layernorm1(_x + self.dropout1(attn_out))
 
+
         _x = x
         x = self.layernorm2(_x + self.dropout2(self.ffn(x)))
+
         return x
 
 
@@ -51,13 +68,18 @@ class Encoder(nn.Module):
         ])
         self.pad_id = pad_id
 
+        #self.history = []
+
     def forward(self, x, key_padding_mask=None):
         if key_padding_mask is None:
             key_padding_mask = (x == self.pad_id)
 
         x = self.embedding(x)  # [B,S,D]
-        for layer in self.layers:
+        for i, layer in enumerate(self.layers):
             x = layer(x, key_padding_mask=key_padding_mask)
+            #x_vec = x.detach().cpu().numpy()
+            #self.history.append(x_vec)
+
         return x
 
 

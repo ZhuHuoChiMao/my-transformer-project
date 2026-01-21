@@ -95,7 +95,7 @@ class Decoder(nn.Module):
             for _ in range(n_layers)
         ])
         self.fc = nn.Linear(d_model, dec_voc_size)
-        #self.history = []
+        self.history = []
 
     def forward(self, dec, enc, src_pad_mask, tgt_pad_mask):
         x = self.embedding(dec)
@@ -107,8 +107,8 @@ class Decoder(nn.Module):
                       tgt_key_padding_mask=tgt_pad_mask,
                       memory_key_padding_mask=src_pad_mask)
 
-            #x_vec = x.detach().cpu().numpy()
-            #self.history.append(x_vec)
+            x_vec = x[0].detach().cpu().numpy()
+            self.history.append(x_vec)
 
         return self.fc(x)
 

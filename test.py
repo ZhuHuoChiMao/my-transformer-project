@@ -52,7 +52,7 @@ model = Transformer(
     max_len=100
 ).to(device)
 
-
+'''
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
 criterion = nn.CrossEntropyLoss(ignore_index=-100)
 
@@ -138,12 +138,13 @@ def translate_en2zh(text_en: str, src_max_len=64, tgt_max_len=64):
 
 
 print(translate_en2zh("this cake is good"))
+'''
 print(translate_en2zh("i don't like eating vegetables"))
 print(translate_en2zh("the winner of the competition will receive a cash prize"))
 print(translate_en2zh("who can tell me the way to the nearest subway station"))
 print(translate_en2zh("do you have any plans for the weekend"))
-
 '''
+
 
 
 

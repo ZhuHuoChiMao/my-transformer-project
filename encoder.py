@@ -12,21 +12,21 @@ class PositionwiseFeedForward(nn.Module):
         self.linear2 = nn.Linear(d_ff, d_model)
         self.dropout = nn.Dropout(dropout)
         self.activation = nn.ReLU()
-        #self.history_ffn1 = []
-        #self.history_ffn2 = []
-        #self.history_ffn3 = []
-        #self.history_ffn4 = []
+        self.history_ffn1 = []
+        self.history_ffn2 = []
+        self.history_ffn3 = []
+        self.history_ffn4 = []
 
     def forward(self, x):
 
-        #ffn_vec1 = self.linear1(x).detach().cpu().numpy()
-        #self.history_ffn1.append(ffn_vec1)
-        #ffn_vec2 = self.activation(self.linear1(x)).detach().cpu().numpy()
-        #self.history_ffn2.append(ffn_vec2)
-        #ffn_vec3 = self.activation(self.linear1(x)).detach().cpu().numpy()
-        #self.history_ffn3.append(ffn_vec3)
-        #ffn_vec4 = self.linear2(self.activation(self.linear1(x))).detach().cpu().numpy()
-        #vself.history_ffn4.append(ffn_vec4)
+        ffn_vec1 = self.linear1(x)[0].detach().cpu().numpy()
+        self.history_ffn1.append(ffn_vec1)
+        ffn_vec2 = self.activation(self.linear1(x)[0]).detach().cpu().numpy()
+        self.history_ffn2.append(ffn_vec2)
+        ffn_vec3 = self.activation(self.linear1(x)[0]).detach().cpu().numpy()
+        self.history_ffn3.append(ffn_vec3)
+        ffn_vec4 = self.linear2(self.activation(self.linear1(x)[0])).detach().cpu().numpy()
+        self.history_ffn4.append(ffn_vec4)
 
         return self.linear2(self.activation(self.linear1(x)))
 
@@ -68,7 +68,7 @@ class Encoder(nn.Module):
         ])
         self.pad_id = pad_id
 
-        #self.history = []
+        self.history = []
 
     def forward(self, x, key_padding_mask=None):
         if key_padding_mask is None:
@@ -77,8 +77,8 @@ class Encoder(nn.Module):
         x = self.embedding(x)  # [B,S,D]
         for i, layer in enumerate(self.layers):
             x = layer(x, key_padding_mask=key_padding_mask)
-            #x_vec = x.detach().cpu().numpy()
-            #self.history.append(x_vec)
+            x_vec = x[0].detach().cpu().numpy()
+            self.history.append(x_vec)
 
         return x
 

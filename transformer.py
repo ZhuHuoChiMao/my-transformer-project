@@ -31,7 +31,7 @@ class TransformerEmbedding(nn.Module):
         self.tok_emb = TokenEmbedding(vocab_size, d_model,pad_id)
         self.pos_emb = PositionEmbedding(d_model, max_len, device)
         self.drop = nn.Dropout(p=drop_prob)
-        #self.history = []
+        self.history = []
 
     def forward(self, x):
 
@@ -43,32 +43,37 @@ class TransformerEmbedding(nn.Module):
 
         # --- 只查看最新词的监控代码 ---
         # 提取最后一个位置的向量：[batch_size, 1, d_model]
-        #latest_word_vec = x[:, -1, :]
+        latest_word_vec = x[:, -1, :]
         # 确保数值为正，防止 log(负数) 报错
         # 我们取绝对值或者只看正值部分
-        #v = latest_word_vec.flatten()
+        v = latest_word_vec.flatten()
 
         # 1. 指数：e 的幂次 (exp)
         # 注意：如果 v 的值大于 88，exp(v) 就会变成 inf (溢出)
-        #v_exp = torch.exp(v)
+        v_exp = torch.exp(v)
 
         # 2. 对数：以 e 为底 (ln)
         # 我们对绝对值加一个极小值 eps，防止 log(0) 变成 -inf
-        #eps = 1e-12
-        #v_log_e = torch.log(torch.abs(v) + eps)
+        eps = 1e-12
+        v_log_e = torch.log(torch.abs(v) + eps)
 
         # 3. 对数：以 10 为底 (log10)
-        #v_log_10 = torch.log10(torch.abs(v) + eps)
-        #print(f"\n[Embedding Stage - Latest Word Only]")
-        #print(f"  Total Batch Length: {batch_size}")
-        #print(f"  Total Sequence Length: {seq_len}")
-        #print(f"  Latest Vector | Mean: {latest_word_vec.mean():.4f} | Std: {latest_word_vec.std():.4f} | Norm: {latest_word_vec.norm():.4f}")
-        #print(f"  Exp (mean): {v_exp.mean().item():.4e}")
-        #print(f"  Log_e (mean): {v_log_e.mean().item():.4f}")
-        #print(f"  Log_10 (mean): {v_log_10.mean().item():.4f}")
-        #print(f"  Vector Snippet (Batch 0, Head 5): {v[0, :5].tolist()}...")
-        #latest_vec = latest_word_vec.detach().cpu().numpy()
-        #self.history.append(latest_vec[0])
+        v_log_10 = torch.log10(torch.abs(v) + eps)
+        print(f"\n[Embedding Stage - Latest Word Only]")
+        print(f"  Total Batch Length: {batch_size}")
+        print(f"  Total Sequence Length: {seq_len}")
+        print(f"  Latest Vector | Mean: {latest_word_vec.mean():.4f} | Std: {latest_word_vec.std():.4f} | Norm: {latest_word_vec.norm():.4f}")
+        print(f"  Exp (mean): {v_exp.mean().item():.4e}")
+        print(f"  Log_e (mean): {v_log_e.mean().item():.4f}")
+        print(f"  Log_10 (mean): {v_log_10.mean().item():.4f}")
+        print(f"  Vector Snippet (Batch 0, Head 5): {v[0, :5].tolist()}...")
+
+        if seq_len > 1:
+            # 存下 Batch 0 的所有词
+            self.history.append(x[0].detach().cpu().numpy())
+        else:
+            # 存下 Batch 0 的最新词
+            self.history.append(x[0, -1, :].detach().cpu().numpy())
 
         return self.drop(x)
 

@@ -66,7 +66,7 @@ class TransformerEmbedding(nn.Module):
         print(f"  Exp (mean): {v_exp.mean().item():.4e}")
         print(f"  Log_e (mean): {v_log_e.mean().item():.4f}")
         print(f"  Log_10 (mean): {v_log_10.mean().item():.4f}")
-        print(f"  Vector Snippet (Batch 0, Head 5): {v[0, :5].tolist()}...")
+        print(f"  Vector Snippet (Batch 0, Head 5): {v[:5].tolist()}...")
 
         if seq_len > 1:
             # 存下 Batch 0 的所有词

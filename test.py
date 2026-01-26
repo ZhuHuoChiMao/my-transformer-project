@@ -52,11 +52,20 @@ model = Transformer(
 ).to(device)
 
 
+save_path = "/content/drive/MyDrive/transformer_epoch_add.pt"
+
+if os.path.exists(save_path):
+    print(f"检测到保存的模型，正在加载权重：{save_path}")
+    # map_location 确保在不同设备（如从 GPU 转 CPU）时也能加载成功
+    model.load_state_dict(torch.load(save_path, map_location=device))
+    print("权重加载成功，继续训练！")
+else:
+    print("未发现预训练权重，将从头开始训练。")
 
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
 criterion = nn.CrossEntropyLoss(ignore_index=-100)
 
-num_epochs = 32
+num_epochs = 4
 for epoch in range(num_epochs):
     model.train()
     total_loss = 0

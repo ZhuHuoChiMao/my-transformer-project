@@ -1,3 +1,4 @@
+'''
 import torch
 from torch import nn
 import math
@@ -122,6 +123,57 @@ class MultiHeadAttention(nn.Module):
         #np.save(fr"C:\Users\acer\PycharmProjects\Transformer\npy\{self.name}_{self.layers_i}_scores_vec{step}.npy", scores_vec)
         #np.save(fr"C:\Users\acer\PycharmProjects\Transformer\npy\{self.name}_{self.layers_i}_attn_vec{step}.npy", attn_vec)
         #np.save(fr"C:\Users\acer\PycharmProjects\Transformer\npy\{self.name}_{self.layers_i}_out_vecm{step}.npy", out_vec)
+
+        return out, attn
+'''
+
+
+
+
+import torch
+from torch import nn
+import math
+
+
+class MultiHeadAttention(nn.Module):
+    def __init__(self, d_model, dropout=0.1):
+        super().__init__()
+        self.d_model = d_model
+
+        self.w_q = nn.Linear(d_model, d_model)
+        self.w_k = nn.Linear(d_model, d_model)
+        self.w_v = nn.Linear(d_model, d_model)
+        self.w_o = nn.Linear(d_model, d_model)
+
+        self.softmax = nn.Softmax(dim=-1)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, q, k, v, attn_mask=None, key_padding_mask=None):
+        B, Q, _ = q.shape
+        Bk, K, _ = k.shape
+
+        q = self.w_q(q)
+        k = self.w_k(k)
+        v = self.w_v(v)
+
+        scores = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(self.d_model)
+
+        if attn_mask is not None:
+            if attn_mask.dtype == torch.bool:
+                scores = scores.masked_fill(attn_mask, float('-inf'))
+            else:
+                scores = scores + attn_mask
+
+        if key_padding_mask is not None:
+            mask = key_padding_mask.unsqueeze(1)
+            scores = scores.masked_fill(mask, float('-inf'))
+
+        attn = self.softmax(scores)
+        attn = self.dropout(attn)
+
+        out = torch.matmul(attn, v)
+
+        out = self.w_o(out)
 
         return out, attn
 

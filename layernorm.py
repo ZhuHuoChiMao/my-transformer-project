@@ -10,8 +10,10 @@ class LayerNorm(nn.Module):
         self.gamma = nn.Parameter(torch.ones(d_model))
         self.beta = nn.Parameter(torch.zeros(d_model))
         self.eps = eps
-        self.history_1 = []
-        self.history_2 = []
+        #self.history_1 = []
+        #self.history_2 = []
+        #self.name = name
+        #self.layers_i = layers_i
     def forward(self,x):
 
         mean = x.mean(-1 , keepdim = True)
@@ -20,13 +22,26 @@ class LayerNorm(nn.Module):
 
 
         output = (x - mean) / (torch.sqrt(var + self.eps))
-        output_vec = output[0].detach().cpu().numpy()
-        self.history_1.append(output_vec)
+        #output_vec = output[0].detach().cpu().numpy()
+        #self.history_1.append(output_vec)
 
         output = self.gamma * output + self.beta
 
-        output_vec = output[0].detach().cpu().numpy()
-        self.history_2.append(output_vec)
+        #output_vecc = output[0].detach().cpu().numpy()
+        #self.history_2.append(output_vecc)
+
+        #import numpy as np
+        #import os
+
+        # 创建一个文件夹专门存向量
+        #if not os.path.exists("debug_vectors"):
+            #os.makedirs("debug_vectors")
+
+        # 使用当前的 history 长度作为 step 序号，防止文件被覆盖
+        #step = len(self.history_1)
+
+        #np.save(fr"C:\Users\acer\PycharmProjects\Transformer\npy\{self.name}_{self.layers_i}_output_vecl{step}.npy", output_vec)
+        #np.save(fr"C:\Users\acer\PycharmProjects\Transformer\npy\{self.name}_{self.layers_i}_output_vecc{step}.npy", output_vecc)
 
 
         return output

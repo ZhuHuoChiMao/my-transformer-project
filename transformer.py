@@ -26,54 +26,42 @@ class PositionEmbedding(nn.Module):
 
 
 class TransformerEmbedding(nn.Module):
-    def __init__(self, vocab_size, d_model, max_len, pad_id, drop_prob,device):
+    def __init__(self, vocab_size, d_model, max_len, pad_id, drop_prob,device,):
         super().__init__()
         self.tok_emb = TokenEmbedding(vocab_size, d_model,pad_id)
         self.pos_emb = PositionEmbedding(d_model, max_len, device)
         self.drop = nn.Dropout(p=drop_prob)
-        self.history = []
+        #self.history_t = []
+        #self.history_p = []
+        #self.history_tp = []
+        #self.name = name
 
     def forward(self, x):
 
         batch_size, seq_len = x.shape
 
         tok_emb = self.tok_emb(x)
+        #self.history_t.append(tok_emb[0].detach().cpu().numpy())
         pos_emb = self.pos_emb(x)
+        #self.history_p.append(pos_emb[0].detach().cpu().numpy())
         x = tok_emb + pos_emb
 
-        # --- 只查看最新词的监控代码 ---
-        # 提取最后一个位置的向量：[batch_size, 1, d_model]
-        latest_word_vec = x[:, -1, :]
-        # 确保数值为正，防止 log(负数) 报错
-        # 我们取绝对值或者只看正值部分
-        v = latest_word_vec.flatten()
+        #self.history_tp.append(x[0].detach().cpu().numpy())
 
-        # 1. 指数：e 的幂次 (exp)
-        # 注意：如果 v 的值大于 88，exp(v) 就会变成 inf (溢出)
-        v_exp = torch.exp(v)
+        # 在 forward 的末尾加上这一段
+        import numpy as np
+        #import os
 
-        # 2. 对数：以 e 为底 (ln)
-        # 我们对绝对值加一个极小值 eps，防止 log(0) 变成 -inf
-        eps = 1e-12
-        v_log_e = torch.log(torch.abs(v) + eps)
+        # 创建一个文件夹专门存向量
+        #if not os.path.exists("debug_vectors"):
+            #os.makedirs("debug_vectors")
 
-        # 3. 对数：以 10 为底 (log10)
-        v_log_10 = torch.log10(torch.abs(v) + eps)
-        print(f"\n[Embedding Stage - Latest Word Only]")
-        print(f"  Total Batch Length: {batch_size}")
-        print(f"  Total Sequence Length: {seq_len}")
-        print(f"  Latest Vector | Mean: {latest_word_vec.mean():.4f} | Std: {latest_word_vec.std():.4f} | Norm: {latest_word_vec.norm():.4f}")
-        print(f"  Exp (mean): {v_exp.mean().item():.4e}")
-        print(f"  Log_e (mean): {v_log_e.mean().item():.4f}")
-        print(f"  Log_10 (mean): {v_log_10.mean().item():.4f}")
-        print(f"  Vector Snippet (Batch 0, Head 5): {v[:5].tolist()}...")
+        # 保存这三个关键步骤
+        # step = len(self.history_t)  # 用长度当序号
+        #np.save(fr"C:\Users\acer\PycharmProjects\Transformer\npy\{self.name}_embedding_t{step}.npy", tok_emb[0].detach().cpu().numpy())
+        #np.save(fr"C:\Users\acer\PycharmProjects\Transformer\npy\{self.name}_embedding_p{step}.npy", pos_emb[0].detach().cpu().numpy())
+        #np.save(fr"C:\Users\acer\PycharmProjects\Transformer\npy\{self.name}_embedding_x{step}.npy", x[0].detach().cpu().numpy())
 
-        if seq_len > 1:
-            # 存下 Batch 0 的所有词
-            self.history.append(x[0].detach().cpu().numpy())
-        else:
-            # 存下 Batch 0 的最新词
-            self.history.append(x[0, -1, :].detach().cpu().numpy())
 
         return self.drop(x)
 

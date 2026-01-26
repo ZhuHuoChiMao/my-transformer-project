@@ -12,6 +12,7 @@ from torch import nn
 from encoder import Encoder
 from decoder import Decoder
 
+
 class Transformer(nn.Module):
     def __init__(self,
                  src_pad_idx,
@@ -26,12 +27,12 @@ class Transformer(nn.Module):
                  device,
                  max_len):
         super().__init__()
-        self.encoder = Encoder(enc_voc_size, max_len, d_model, d_ff, n_heads, n_layers, src_pad_idx, drop_prob,device)
-        self.decoder = Decoder(dec_voc_size, max_len, d_model, d_ff, n_heads, n_layers,trg_pad_idx, drop_prob,device)
+        self.encoder = Encoder(enc_voc_size, max_len, d_model, d_ff, n_heads, n_layers, src_pad_idx, drop_prob,device,)
+        self.decoder = Decoder(dec_voc_size, max_len, d_model, d_ff, n_heads, n_layers,trg_pad_idx, drop_prob,device,)
         self.trg_pad_idx = trg_pad_idx
         self.src_pad_idx = src_pad_idx
         self.device = device
-        self.history = []
+        #self.history = []
 
     def forward(self, src: torch.Tensor, trg: torch.Tensor):
         src_pad_mask = (src == self.src_pad_idx)
@@ -43,8 +44,19 @@ class Transformer(nn.Module):
 
         out = self.decoder(trg, enc, src_pad_mask, tgt_pad_mask)
 
-        out_vec = out.detach().cpu().numpy()
-        self.history.append(out_vec)
+        #out_vec = out[0].detach().cpu().numpy()
+        #self.history.append(out_vec)
+        #import numpy as np
+        #import os
+
+        # 创建一个文件夹专门存向量
+        #if not os.path.exists("debug_vectors"):
+            #os.makedirs("debug_vectors")
+
+        # 使用当前的 history 长度作为 step 序号，防止文件被覆盖
+        #step = len(self.history)
+
+        #np.save(fr"C:\Users\acer\PycharmProjects\Transformer\npy\out_vect{step}.npy", out_vec)
 
 
         return out

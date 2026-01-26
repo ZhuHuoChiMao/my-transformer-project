@@ -28,7 +28,6 @@ tok_zh = trainclass.SimpleTokenizer('zh')
 tok_en.fit(data['en'])
 tok_zh.fit(data['zh'])
 
-
 dataset = trainclass.SimpleTranslationDataset(data)
 collate_fn = trainclass.SimpleTranslationDataset.make_collate_fn(tok_en, tok_zh, max_src_len=32, max_tgt_len=32)
 loader = DataLoader(dataset, batch_size=64, shuffle=True, collate_fn=collate_fn)
@@ -52,7 +51,7 @@ model = Transformer(
     max_len=100
 ).to(device)
 
-'''
+
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
 criterion = nn.CrossEntropyLoss(ignore_index=-100)
 
@@ -96,10 +95,11 @@ for epoch in range(num_epochs):
     size_mb = os.path.getsize(save_path) / (1024 * 1024)
     print(f"模型已保存到: {save_path} （大小约 {size_mb:.2f} MB）\n")
 
+
+
 '''
-
-
-ckpt_path = "/content/drive/MyDrive/transformer_epoch_add.pt"
+#ckpt_path = "/content/drive/MyDrive/transformer_epoch_add.pt"
+ckpt_path = r"C:\Users\acer\PycharmProjects\Transformer\transformer_epoch_add.pt"
 model.load_state_dict(torch.load(ckpt_path, map_location=device))
 model.eval()
 
@@ -138,6 +138,7 @@ def translate_en2zh(text_en: str, src_max_len=64, tgt_max_len=64):
 
 
 print(translate_en2zh("this cake is good"))
+'''
 '''
 print(translate_en2zh("i don't like eating vegetables"))
 print(translate_en2zh("the winner of the competition will receive a cash prize"))

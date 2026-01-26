@@ -8,15 +8,15 @@ from transformer import TransformerEmbedding
 
 
 class DecoderLayer(nn.Module):
-    def __init__(self, d_model, d_ff, n_head, drop_prob):
+    def __init__(self, d_model, d_ff, n_head,drop_prob):
         super().__init__()
-        self.self_attn = MultiHeadAttention(d_model, n_head, dropout=drop_prob)
+        self.self_attn = MultiHeadAttention(d_model, n_head,dropout=drop_prob)
         self.cross_attn = MultiHeadAttention(d_model, n_head, dropout=drop_prob)
 
-        self.ln1 = LayerNorm(d_model)
+        self.ln1 = LayerNorm(d_model,)
         self.do1 = nn.Dropout(drop_prob)
 
-        self.ln2 = LayerNorm(d_model)
+        self.ln2 = LayerNorm(d_model,)
         self.do2 = nn.Dropout(drop_prob)
 
         #add
@@ -24,7 +24,7 @@ class DecoderLayer(nn.Module):
         #self.doa = nn.Dropout(drop_prob)
 
         self.ffn = PositionwiseFeedForward(d_model, d_ff, drop_prob)
-        self.ln3 = LayerNorm(d_model)
+        self.ln3 = LayerNorm(d_model,)
         self.do3 = nn.Dropout(drop_prob)
 
     def forward(self, dec, enc,
@@ -91,11 +91,11 @@ class Decoder(nn.Module):
         super().__init__()
         self.embedding = TransformerEmbedding(dec_voc_size, d_model, max_len, pad_id, drop_prob,device)
         self.layers = nn.ModuleList([
-            DecoderLayer(d_model, d_ff, n_head, drop_prob)
+            DecoderLayer(d_model, d_ff, n_head,drop_prob)
             for _ in range(n_layers)
         ])
         self.fc = nn.Linear(d_model, dec_voc_size)
-        self.history = []
+        #self.history = []
 
     def forward(self, dec, enc, src_pad_mask, tgt_pad_mask):
         x = self.embedding(dec)
@@ -107,8 +107,19 @@ class Decoder(nn.Module):
                       tgt_key_padding_mask=tgt_pad_mask,
                       memory_key_padding_mask=src_pad_mask)
 
-            x_vec = x[0].detach().cpu().numpy()
-            self.history.append(x_vec)
+            #x_vec = x[0].detach().cpu().numpy()
+            #self.history.append(x_vec)
+            #import numpy as np
+            #import os
+
+            # 创建一个文件夹专门存向量
+            #if not os.path.exists("debug_vectors"):
+                #os.makedirs("debug_vectors")
+
+            # 使用当前的 history 长度作为 step 序号，防止文件被覆盖
+            #step = len(self.history)
+
+            #np.save(fr"C:\Users\acer\PycharmProjects\Transformer\npy\{layer}_x_vecd{step}.npy", x_vec)
 
         return self.fc(x)
 

@@ -5,7 +5,7 @@ import math
 from encoder import Encoder
 from decoder import Decoder
 
-
+#np.save(fr"C:\Users\acer\PycharmProjects\Transformer\npy\out_vect{step}.npy", out_vec)
 '''
 import torch
 from torch import nn
@@ -56,7 +56,7 @@ class Transformer(nn.Module):
         # 使用当前的 history 长度作为 step 序号，防止文件被覆盖
         #step = len(self.history)
 
-        #np.save(fr"C:\Users\acer\PycharmProjects\Transformer\npy\out_vect{step}.npy", out_vec)
+        
 
 
         return out

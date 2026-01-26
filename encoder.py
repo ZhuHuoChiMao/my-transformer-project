@@ -48,7 +48,7 @@ class PositionwiseFeedForward(nn.Module):
         #np.save(fr"C:\Users\acer\PycharmProjects\Transformer\npy\{self.name}_{self.layers_i}_ffn_vec3{step}.npy", ffn_vec3)
         #np.save(fr"C:\Users\acer\PycharmProjects\Transformer\npy\{self.name}_{self.layers_i}_ffn_vec4{step}.npy", ffn_vec4)
 
-        return self.linear2(self.activation(self.linear1(x)))
+        return self.linear2(self.dropout(self.activation(self.linear1(x))))
 
 
 

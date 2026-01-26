@@ -95,11 +95,26 @@ for epoch in range(num_epochs):
     size_mb = os.path.getsize(save_path) / (1024 * 1024)
     print(f"模型已保存到: {save_path} （大小约 {size_mb:.2f} MB）\n")
 
+    # ckpt_path = r"C:\Users\acer\PycharmProjects\Transformer\transformer_epoch_add.pt"
+
+    #print(f"\n[Inference Start] Input: {src_ids} and {src}")
+
+    #bos_id, eos_id = tok_zh.bos_id, tok_zh.eos_id
+    #tgt = torch.tensor([[bos_id]], dtype=torch.long, device=device)
+    #print(f"\n[Inference Start] Input: {bos_id}")
+    #print(f"\n[Inference Start] Input: {eos_id}")
+    #print(f"\n[Inference Start] Input: {text_en}")
+
+    #for _ in range(tgt_max_len):
+
+
 
 
 '''
 #ckpt_path = "/content/drive/MyDrive/transformer_epoch_add.pt"
-ckpt_path = r"C:\Users\acer\PycharmProjects\Transformer\transformer_epoch_add.pt"
+
+
+
 model.load_state_dict(torch.load(ckpt_path, map_location=device))
 model.eval()
 
@@ -108,13 +123,11 @@ def translate_en2zh(text_en: str, src_max_len=64, tgt_max_len=64):
     # 1. encode src
     src_ids = tok_en.encode(text_en, add_bos=False, add_eos=True, max_len=src_max_len)
     src = torch.tensor([src_ids], dtype=torch.long, device=device)
-    print(f"\n[Inference Start] Input: {src_ids} and {src}")
+
 
     bos_id, eos_id = tok_zh.bos_id, tok_zh.eos_id
     tgt = torch.tensor([[bos_id]], dtype=torch.long, device=device)
-    print(f"\n[Inference Start] Input: {bos_id}")
-    print(f"\n[Inference Start] Input: {eos_id}")
-    print(f"\n[Inference Start] Input: {text_en}")
+
 
     for _ in range(tgt_max_len):
         out = model(src, tgt)           # [1, T, vocab]

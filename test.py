@@ -52,6 +52,7 @@ model = Transformer(
 ).to(device)
 
 
+
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
 criterion = nn.CrossEntropyLoss(ignore_index=-100)
 
@@ -146,7 +147,6 @@ def translate_en2zh(text_en: str, src_max_len=64, tgt_max_len=64):
 
 
 print(translate_en2zh("this cake is good"))
-
 '''
 '''
 print(translate_en2zh("this cake is good"))

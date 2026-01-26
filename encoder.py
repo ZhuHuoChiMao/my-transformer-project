@@ -56,10 +56,10 @@ class EncoderLayer(nn.Module):
     def __init__(self, d_model, n_head, d_ff, dropout=0.1):
         super().__init__()
         self.attention = MultiHeadAttention(d_model, n_head,)
-        self.layernorm1 = LayerNorm(d_model,)
+        self.layernorm1 = nn.LayerNorm(d_model,)
         self.dropout1 = nn.Dropout(dropout)
         self.ffn = PositionwiseFeedForward(d_model, d_ff,dropout)
-        self.layernorm2 = LayerNorm(d_model,)
+        self.layernorm2 = nn.LayerNorm(d_model,)
         self.dropout2 = nn.Dropout(dropout)
 
     def forward(self, x, key_padding_mask=None):

@@ -35,7 +35,7 @@ loader = DataLoader(dataset, batch_size=64, shuffle=True, collate_fn=collate_fn)
 dataset_test = trainclass.SimpleTranslationDataset(data_test)
 collate_fn = trainclass.SimpleTranslationDataset.make_collate_fn(tok_en, tok_zh, max_src_len=32, max_tgt_len=32)
 loader_test = DataLoader(dataset_test, batch_size=8, shuffle=True, collate_fn=collate_fn)
-#n_heads = 8,
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = Transformer(
     src_pad_idx=tok_en.pad_id,
@@ -43,8 +43,9 @@ model = Transformer(
     enc_voc_size=len(tok_en.itos),
     dec_voc_size=len(tok_zh.itos),
     d_model=512,
+    n_heads = 1,
     d_ff=2048,
-    n_layers=8,
+    n_layers=1,
     drop_prob=0.1,
     device=device,
     max_len=100

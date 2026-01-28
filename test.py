@@ -111,7 +111,7 @@ for epoch in range(num_epochs):
 
 r'''
 #ckpt_path = "/content/drive/MyDrive/transformer_epoch_add.pt"
-ckpt_path = r"C:\Users\acer\PycharmProjects\Transformer\transformer_epoch_add.pt"
+ckpt_path = r"C:\Users\acer\PycharmProjects\Transformer\transformer_epoch_add_n.pt"
 
 
 model.load_state_dict(torch.load(ckpt_path, map_location=device))
@@ -155,7 +155,7 @@ def translate_en2zh(text_en: str, src_max_len=64, tgt_max_len=64):
 
 
 
-print(translate_en2zh("this cake is good"))
+print(translate_en2zh("i like my father"))
 '''
 '''
 print(translate_en2zh("this cake is good"))

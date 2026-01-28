@@ -1,4 +1,4 @@
-
+r'''
 import torch
 from torch import nn
 import math
@@ -125,6 +125,75 @@ class MultiHeadAttention(nn.Module):
         #np.save(fr"C:\Users\acer\PycharmProjects\Transformer\npy\{self.name}_{self.layers_i}_out_vecm{step}.npy", out_vec)
 
         return out, attn
+'''
+
+import torch
+from torch import nn
+import math
+
+class MultiHeadAttention(nn.Module):
+    def __init__(self, d_model, n_head,dropout=0.1):
+        super().__init__()
+        assert d_model % n_head == 0
+        self.n_head = n_head
+        self.d_model = d_model
+        self.d_k = d_model // n_head
+
+        self.w_q = nn.Linear(d_model, d_model)
+        self.w_k = nn.Linear(d_model, d_model)
+        self.w_v = nn.Linear(d_model, d_model)
+        self.w_o = nn.Linear(d_model, d_model)
+        self.attn_drop = nn.Dropout(dropout)
+
+        self.softmax = nn.Softmax(dim=-1)
+
+
+    def forward(self, q, k, v, attn_mask=None, key_padding_mask=None):
+        B, Q, _ = q.shape
+        Bk, K, _ = k.shape
+        assert B == Bk, f"Batch mismatch: q={B}, k={Bk}"
+        H, d_k = self.n_head, self.d_k
+
+
+        q = self.w_q(q).view(B, Q, H, d_k).permute(0, 2, 1, 3)
+        k = self.w_k(k).view(B, K, H, d_k).permute(0, 2, 1, 3)
+        v = self.w_v(v).view(B, K, H, d_k).permute(0, 2, 1, 3)
+
+
+
+        scores = torch.matmul(q, k.transpose(-2, -1))
+
+
+        scores = scores/ math.sqrt(d_k)
+
+        if attn_mask is not None:
+            if attn_mask.dtype == torch.bool:
+                if attn_mask.dim() == 2:
+                    attn_mask = attn_mask.unsqueeze(0).unsqueeze(0)
+                elif attn_mask.dim() == 3:
+                    attn_mask = attn_mask.unsqueeze(1)  # [B,1,Q,K]
+                scores = scores.masked_fill(attn_mask, float("-inf"))
+            else:
+                if attn_mask.dim() == 2:
+                    attn_mask = attn_mask.unsqueeze(0).unsqueeze(0)
+                elif attn_mask.dim() == 3:
+                    attn_mask = attn_mask.unsqueeze(1)
+                scores = scores + attn_mask
+
+
+        if key_padding_mask is not None:
+            mask = key_padding_mask.unsqueeze(1).unsqueeze(1)
+            scores = scores.masked_fill(mask, float('-inf'))
+
+        attn = self.softmax(scores)
+        attn = self.attn_drop(attn)
+        out = torch.matmul(attn, v)
+        out = out.permute(0, 2, 1, 3).contiguous().view(B, Q, self.d_model)
+        out = self.w_o(out)
+
+
+        return out, attn
+
 
 
 

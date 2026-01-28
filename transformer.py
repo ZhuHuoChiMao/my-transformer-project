@@ -1,3 +1,4 @@
+r'''
 import torch
 from torch import nn
 import math
@@ -65,6 +66,57 @@ class TransformerEmbedding(nn.Module):
 
         return self.drop(x)
 
+'''
+
+import torch
+from torch import nn
+import math
+
+
+class TokenEmbedding(nn.Embedding):
+    def __init__(self, vocab_size, d_model, pad_id):
+        super().__init__(vocab_size, d_model, padding_idx=pad_id)
+
+class PositionEmbedding(nn.Module):
+    def __init__(self, d_model, max_len):
+        super().__init__()
+        pe = torch.zeros(max_len, d_model)  # 先不绑死 device/dtype
+        pos = torch.arange(0, max_len).float().unsqueeze(1)  # [max_len, 1]
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
+        # div_term: [ceil(d_model/2)]
+
+        pe[:, 0::2] = torch.sin(pos * div_term)
+
+        # 处理 d_model 为奇数：cos 的列数更少，需要裁剪 div_term
+        if d_model > 1:
+            pe[:, 1::2] = torch.cos(pos * div_term[:pe[:, 1::2].shape[1]])
+
+        self.register_buffer("encoding", pe, persistent=True)
+
+    def forward(self, x):
+        seq_len = x.size(1)
+        if seq_len > self.encoding.size(0):
+            raise ValueError(f"seq_len={seq_len} > max_len={self.encoding.size(0)}")
+        return self.encoding[:seq_len].unsqueeze(0).to(dtype=self.encoding.dtype)
+
+
+
+class TransformerEmbedding(nn.Module):
+    def __init__(self, vocab_size, d_model, max_len, pad_id, drop_prob,device,):
+        super().__init__()
+        self.tok_emb = TokenEmbedding(vocab_size, d_model,pad_id)
+        self.pos_emb = PositionEmbedding(d_model, max_len, device)
+        self.drop = nn.Dropout(p=drop_prob)
+
+
+    def forward(self, x):
+
+        tok_emb = self.tok_emb(x)
+        pos_emb = self.pos_emb(x)
+        x = tok_emb + pos_emb
+
+
+        return self.drop(x)
 
 
 

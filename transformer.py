@@ -102,10 +102,10 @@ class PositionEmbedding(nn.Module):
 
 
 class TransformerEmbedding(nn.Module):
-    def __init__(self, vocab_size, d_model, max_len, pad_id, drop_prob,device,):
+    def __init__(self, vocab_size, d_model, max_len, pad_id, drop_prob,):
         super().__init__()
         self.tok_emb = TokenEmbedding(vocab_size, d_model,pad_id)
-        self.pos_emb = PositionEmbedding(d_model, max_len, device)
+        self.pos_emb = PositionEmbedding(d_model, max_len)
         self.drop = nn.Dropout(p=drop_prob)
 
 
